@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebSwan · Compliance Checker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #0b1b2f;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .card {
+      max-width: 880px;
+      width: 100%;
+      background: white;
+      border-radius: 2rem;
+      padding: 2rem 2.2rem;
+      box-shadow: 0 20px 40px -8px rgba(0, 20, 40, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin: 0 auto;
+    }
+    .brand {
+      border-bottom: 3px solid #1e6f9f;
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .brand h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0a1e2f;
+      line-height: 1.2;
+    }
+    .brand h1 span { color: #1e6f9f; }
+    .brand .sub {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: #2c4b66;
+      margin-top: 0.05rem;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-module {
+      background: #f5faff;
+      border-radius: 1.2rem;
+      padding: 1.4rem 1.2rem;
+      border: 1px solid #e0edf7;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-module:hover {
+      background: #ecf7ff;
+      border-color: #8fc8e8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -6px rgba(20, 70, 120, 0.08);
+    }
+    .card-module .card-icon { font-size: 1.4rem; color: #1e6f9f; margin-bottom: 0.3rem; }
+    .card-module h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0a1e2f;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .card-module h2 i { color: #1e6f9f; font-size: 0.9rem; }
+    .card-module p {
+      font-size: 0.85rem;
+      color: #1f3c54;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      flex: 1;
+    }
+    .card-module a {
+      background: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-decoration: none;
+      color: #0a1e2f;
+      border: 1.5px solid #b2d6ed;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      align-self: flex-start;
+    }
+    .card-module a i { color: #1e6f9f; font-size: 0.7rem; transition: transform 0.2s; }
+    .card-module a:hover { background: #0a1e2f; border-color: #0a1e2f; color: white; }
+    .card-module a:hover i { color: white; transform: translateX(3px); }
+    .webswan-brand {
+      text-align: center;
+      padding: 0.6rem 0 0.8rem 0;
+      border-top: 2px solid #dbeaf5;
+      margin-bottom: 0.6rem;
+    }
+    .webswan-brand h3 { font-size: 1.1rem; font-weight: 700; color: #0a1e2f; }
+    .webswan-brand h3 i { color: #1e6f9f; margin-right: 8px; }
+    .webswan-brand p { font-size: 0.85rem; color: #2c4b66; margin-top: 2px; }
+
+    /* pricing row */
+    .pricing-row {
+      margin: 0.8rem 0 0.2rem 0;
+      display: flex;
+      justify-content: center;
+    }
+    .pricing-link {
+      background: #0a1e2f;
+      color: white !important;
+      padding: 0.7rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 6px 14px -4px rgba(10, 30, 47, 0.3);
+      transition: all 0.2s;
+      border: 1.5px solid transparent;
+    }
+    .pricing-link i { color: #8fc8e8; font-size: 0.85rem; transition: transform 0.2s; }
+    .pricing-link:hover { background: #1e6f9f; transform: translateY(-2px); box-shadow: 0 10px 20px -6px rgba(30, 111, 159, 0.35); }
+    .pricing-link:hover i { transform: translateX(3px); color: white; }
+
+    /* ---------- COMPLIANCE CHECKER ---------- */
+    .compliance-module {
+      background: #f5faff;
+      border-radius: 1.2rem;
+      padding: 1.2rem 1.4rem;
+      border: 1px solid #e0edf7;
+      margin-top: 0.2rem;
+    }
+    .compliance-module .module-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+    .compliance-module .module-header i { font-size: 1.3rem; color: #1e6f9f; }
+    .compliance-module .module-header h2 { font-size: 1.05rem; font-weight: 600; color: #0a1e2f; }
+    .compliance-module .module-header h2 span { color: #1e6f9f; }
+    .url-input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+    #urlInput {
+      flex: 1;
+      min-width: 180px;
+      padding: 11px 18px;
+      border-radius: 50px;
+      border: 2px solid #d0dcec;
+      font-size: 0.9rem;
+      color: #0a1e2f;
+      transition: border-color 0.25s, box-shadow 0.2s;
+      outline: none;
+      background: white;
+    }
+    #urlInput:focus {
+      border-color: #1e6f9f;
+      box-shadow: 0 0 0 4px rgba(30, 111, 159, 0.12);
+    }
+    .check-btn {
+      background: linear-gradient(45deg, #0a1e2f, #1e6f9f);
+      color: white;
+      border: none;
+      padding: 11px 28px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .check-btn:hover { opacity: 0.88; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(30, 111, 159, 0.2); }
+
+    .result-box {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #e3e3e3;
+      display: none;
+      animation: fadeSlide 0.35s ease;
+      margin-top: 0.2rem;
+    }
+    .result-box.show { display: block; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .result-header {
+      background: linear-gradient(90deg, #0a1e2f, #1e6f9f);
+      color: white;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .result-body { padding: 12px 14px; background: #f9f9f9; }
+    .result-content {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 8px;
+      border: 2px solid #e0e0e0;
+    }
+    .result-content h3 { color: #0a1e2f; margin-bottom: 6px; font-size: 0.85rem; }
+    .result-content ul { list-style: none; padding: 0; }
+    .result-content ul li {
+      padding: 5px 0;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #1f3c54;
+    }
+    .result-content ul li:last-child { border-bottom: none; }
+    .result-content ul li i { color: #1e6f9f; margin-top: 2px; min-width: 14px; font-size: 0.7rem; }
+    .score-badge {
+      display: inline-block;
+      background: #0a1e2f;
+      color: white;
+      padding: 2px 16px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+    .score-badge i { margin-right: 6px; }
+    .compliance-note {
+      background: #f0f7ff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 6px 0;
+      border-left: 4px solid #1e6f9f;
+      font-size: 0.8rem;
+      color: #1f3a57;
+    }
+    .result-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .btn-open, .btn-copy {
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-open {
+      background: linear-gradient(45deg, #0a1e2f, #1e6f9f);
+      color: white;
+      flex: 1;
+      min-width: 100px;
+      justify-content: center;
+    }
+    .btn-open:hover { opacity: 0.88; }
+    .btn-copy {
+      background: white;
+      color: #0a1e2f;
+      border: 2px solid #0a1e2f;
+      flex-shrink: 0;
+    }
+    .btn-copy:hover { background: #0a1e2f; color: white; }
+    .footnote { font-size: 0.75rem; color: #1f4763; margin-top: 0.5rem; }
+    .footnote i { color: #1e6f9f; margin-right: 4px; }
+
+    /* ----- INTEREST FORM (hidden by default) ----- */
+    .interest-section {
+      margin-top: 10px;
+      padding: 6px 0 0 0;
+      border-top: 2px dashed #d0dcec;
+    }
+    .interest-question {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #0a1e2f;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 6px 0 4px 0;
+    }
+    .interest-question .btn-yes, .interest-question .btn-no {
+      background: white;
+      border: 2px solid #1e6f9f;
+      padding: 3px 18px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.15s;
+      color: #0a1e2f;
+    }
+    .interest-question .btn-yes:hover, .interest-question .btn-no:hover {
+      background: #1e6f9f;
+      color: white;
+    }
+    .interest-form {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+      opacity: 0;
+      margin-top: 0;
+    }
+    .interest-form.open {
+      max-height: 700px;
+      opacity: 1;
+      margin-top: 12px;
+    }
+    .interest-form .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: white;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 2px solid #d0dcec;
+    }
+    .interest-form .form-grid input {
+      padding: 8px 14px;
+      border-radius: 40px;
+      border: 1.5px solid #d0dcec;
+      font-size: 0.8rem;
+      outline: none;
+      transition: 0.15s;
+      background: white;
+    }
+    .interest-form .form-grid input:focus {
+      border-color: #1e6f9f;
+      box-shadow: 0 0 0 3px rgba(30, 111, 159, 0.1);
+    }
+    .interest-form .form-grid .full-width { grid-column: 1 / -1; }
+    .interest-form .form-grid .submit-btn {
+      background: linear-gradient(45deg, #0a1e2f, #1e6f9f);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+      justify-self: start;
+    }
+    .interest-form .form-grid .submit-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* State Compliance module */
+    .state-module {
+      background: #f5faff;
+      border-radius: 1.2rem;
+      padding: 1.2rem 1.4rem;
+      border: 1px solid #e0edf7;
+      margin-top: 1rem;
+    }
+    .state-module .module-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+    .state-module .module-header i { font-size: 1.3rem; color: #1e6f9f; }
+    .state-module .module-header h2 { font-size: 1.05rem; font-weight: 600; color: #0a1e2f; }
+    .state-module .module-header h2 span { color: #1e6f9f; }
+    .state-input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+    #stateInput {
+      flex: 1;
+      min-width: 160px;
+      padding: 11px 18px;
+      border-radius: 50px;
+      border: 2px solid #d0dcec;
+      font-size: 0.9rem;
+      color: #0a1e2f;
+      transition: border-color 0.25s, box-shadow 0.2s;
+      outline: none;
+      background: white;
+    }
+    #stateInput:focus {
+      border-color: #1e6f9f;
+      box-shadow: 0 0 0 4px rgba(30, 111, 159, 0.12);
+    }
+    .state-check-btn {
+      background: linear-gradient(45deg, #0a1e2f, #1e6f9f);
+      color: white;
+      border: none;
+      padding: 11px 24px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .state-check-btn:hover { opacity: 0.88; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(30, 111, 159, 0.2); }
+
+    .footer-note {
+      margin-top: 1.5rem;
+      border-top: 2px solid #dbeaf5;
+      padding-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #1f4763;
+      font-size: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .footer-note .copyright { font-weight: 500; }
+    .footer-note .copyright i { color: #1e6f9f; margin-right: 4px; }
+    .footer-note .brand-tag { color: #1e6f9f; font-weight: 600; }
+
+    @media (max-width: 700px) {
+      .card { padding: 1.4rem 1.2rem; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .brand h1 { font-size: 1.3rem; }
+      .url-input-row, .state-input-row { flex-direction: column; }
+      .check-btn, .state-check-btn { width: 100%; justify-content: center; }
+      .pricing-link { width: 100%; justify-content: center; padding: 0.7rem 1.2rem; }
+      .interest-form .form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 400px) {
+      .card { padding: 1rem 0.8rem; border-radius: 1.4rem; }
+      .card-module a { width: 100%; justify-content: center; }
+      .result-actions { flex-direction: column; }
+      .btn-open, .btn-copy { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <!-- Header -->
+  <div class="brand">
+    <h1>WebSwan Digital <span>Insights</span>
+      <span class="sub">Google Algorithm · State Compliance</span>
+    </h1>
+  </div>
+
+  <!-- Grid -->
+  <div class="dashboard-grid">
+    <div class="card-module">
+      <div class="card-icon"><i class="fas fa-chart-simple"></i></div>
+      <h2><i class="fab fa-google"></i> Google Updates</h2>
+      <p>Track the latest changes, confirmed updates, and expert analysis from the Search Engine Roundtable.</p>
+      <a href="https://www.seroundtable.com/category/google-updates" target="_blank" rel="noopener noreferrer">
+        <span>Visit hub</span> <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    <div class="card-module">
+      <div class="card-icon"><i class="fas fa-universal-access"></i></div>
+      <h2><i class="fas fa-file-alt"></i> ADA Resource</h2>
+      <p>Official DOJ rule on web &amp; mobile app accessibility (2024-03-08).</p>
+      <a href="https://www.ada.gov/resources/2024-03-08-web-rule/" target="_blank" rel="noopener noreferrer">
+        <span>Read the rule</span> <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="webswan-brand">
+    <h3><i class="fas fa-swan"></i> The WebSwan</h3>
+    <p>Your Path to a Stronger Online Presence</p>
+  </div>
+
+  <!-- ===== WEBSITE COMPLIANCE CHECKER ===== -->
+  <div class="compliance-module">
+    <div class="module-header">
+      <i class="fas fa-shield-halved"></i>
+      <h2>Website Compliance <span>Checker</span></h2>
+    </div>
+    <p style="font-size: 0.85rem; color: #1f3c54; margin-bottom: 0.8rem;">
+      <i class="fas fa-hand-point-right" style="color: #1e6f9f;"></i> Click here to enter your website address please
+    </p>
+    <div class="url-input-row">
+      <input type="text" id="urlInput" placeholder="Enter your website address here:" value="https://www." onfocus="if(this.value==='https://www.') this.select();" onkeydown="if(event.key==='Enter') runComplianceCheck()">
+      <button class="check-btn" onclick="runComplianceCheck()">
+        <i class="fas fa-robot"></i> Analyze
+      </button>
+    </div>
+
+    <div class="result-box" id="complianceResult">
+      <div class="result-header">
+        <i class="fas fa-clipboard-list"></i>
+        <span id="complianceSiteName">Compliance Report</span>
+      </div>
+      <div class="result-body">
+        <div id="complianceDisplay"></div>
+        <div class="result-actions">
+          <button class="btn-open" onclick="openComplianceUrl()">
+            <i class="fas fa-arrow-up-right-from-square"></i> View analysis
+          </button>
+          <button class="btn-copy" onclick="copyComplianceUrl()">
+            <i class="fas fa-copy"></i> Copy link
+          </button>
+        </div>
+        <div class="interest-section" id="interestSection" style="display:none;">
+          <div class="interest-question">
+            <span>Would you be interested in a full complimentary website analysis?</span>
+            <button class="btn-yes" onclick="toggleInterestForm(true)">Yes</button>
+            <button class="btn-no" onclick="toggleInterestForm(false)">No</button>
+          </div>
+          <div class="interest-form" id="interestForm">
+            <div class="form-grid">
+              <input type="text" placeholder="Your full name" class="full-width">
+              <input type="text" placeholder="Phone number" class="full-width">
+              <input type="text" placeholder="Business name" class="full-width">
+              <input type="text" placeholder="Business website" value="https://www." class="full-width" onfocus="if(this.value==='https://www.') this.select();">
+              <button class="submit-btn full-width">Request Analysis</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="footnote"><i class="fas fa-info-circle"></i> Score: 11% (no banner/ADA) → 100% (full compliance). State alignment checked.</p>
+  </div>
+
+  <!-- ===== STATE COMPLIANCE (moved above pricing) ===== -->
+  <div class="state-module">
+    <div class="module-header">
+      <i class="fas fa-gavel"></i>
+      <h2>State Compliance <span>Penalty Checker</span></h2>
+    </div>
+    <div class="state-input-row">
+      <input type="text" id="stateInput" placeholder="e.g. California, Texas…" onkeydown="if(event.key==='Enter') searchStateCompliance()">
+      <button class="state-check-btn" onclick="searchStateCompliance()">
+        <i class="fas fa-magnifying-glass"></i> Check
+      </button>
+    </div>
+    <div class="result-box" id="stateResult">
+      <div class="result-header">
+        <i class="fas fa-gavel"></i>
+        <span id="selectedStateName">Compliance Results</span>
+      </div>
+      <div class="result-body">
+        <div id="stateComplianceDisplay"></div>
+        <div class="result-actions">
+          <button class="btn-open" onclick="openStateSearch()">
+            <i class="fas fa-arrow-up-right-from-square"></i> Search Online
+          </button>
+          <button class="btn-copy" onclick="copyStateLink()">
+            <i class="fas fa-copy"></i> Copy Link
+          </button>
+        </div>
+      </div>
+    </div>
+    <p class="footnote"><i class="fas fa-info-circle"></i> Enter a US state to see regulations, penalties, and resources.</p>
+  </div>
+
+  <!-- Pricing button (now below both compliance modules) -->
+  <div class="pricing-row">
+    <a href="https://webswan-pricing-booking.netlify.app/" target="_blank" rel="noopener noreferrer" class="pricing-link">
+      <i class="fas fa-hand-point-right"></i> Click here to View website packages
+      <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-note">
+    <span class="copyright"><i class="far fa-copyright"></i> 2026 WebSwan Digital Solutions</span>
+    <span class="brand-tag"><i class="fas fa-swan"></i> Google · Compliance</span>
+  </div>
+</div>
+
+<script>
+  // ------- WEBSITE COMPLIANCE ENGINE -------
+  function runComplianceCheck() {
+    let input = document.getElementById('urlInput').value.trim();
+    if (!input || input === 'https://www.') { document.getElementById('urlInput').focus(); return; }
+    if (!input.startsWith('http://') && !input.startsWith('https://')) {
+      input = 'https://' + input;
+    }
+    const url = input;
+
+    let score = 11;
+    let hasPrivacy = false, hasADA = false, hasBanner = false;
+    let stateAligned = true;
+    let stateMessage = '';
+
+    if (url.includes('privacy') || url.includes('policy') || url.includes('legal')) hasPrivacy = true;
+    if (url.includes('ada') || url.includes('accessibility') || url.includes('wcag') || url.includes('a11y')) hasADA = true;
+    if (url.includes('banner') || url.includes('consent') || url.includes('cookie') || url.includes('gdpr')) hasBanner = true;
+
+    if (hasPrivacy && hasADA && hasBanner) score = 100;
+    else if (hasPrivacy && hasADA) score = 50;
+    else if (hasPrivacy && hasBanner) score = 50;
+    else if (hasADA && hasBanner) score = 50;
+    else if (hasPrivacy || hasADA) score = 23;
+
+    const stateKeywords = ['california', 'ca-', 'texas', 'tx-', 'newyork', 'ny-', 'florida', 'fl-'];
+    let foundState = null;
+    for (let s of stateKeywords) {
+      if (url.toLowerCase().includes(s)) { foundState = s; break; }
+    }
+    if (foundState) {
+      if (foundState.includes('california') && !url.includes('ccpa')) {
+        stateAligned = false; stateMessage = 'California: missing CCPA compliance (privacy policy does not mention California-specific rights).';
+      } else if (foundState.includes('texas') && !url.includes('tdpsa')) {
+        stateAligned = false; stateMessage = 'Texas: missing TDPSA compliance (Texas Data Privacy and Security Act).';
+      } else if (foundState.includes('newyork') && !url.includes('shield')) {
+        stateAligned = false; stateMessage = 'New York: missing SHIELD Act compliance (data breach notification).';
+      } else if (foundState.includes('florida') && !url.includes('fppa')) {
+        stateAligned = false; stateMessage = 'Florida: missing FPPA compliance (Florida Privacy Protection Act).';
+      }
+    } else {
+      stateMessage = 'No specific state detected in URL. Ensure compliance with applicable state laws.';
+    }
+    if (!stateAligned && score > 50) score = 50;
+
+    const resultBox = document.getElementById('complianceResult');
+    resultBox.classList.add('show');
+
+    const siteName = url.replace(/^https?:\/\//, '').split('/')[0];
+    document.getElementById('complianceSiteName').innerText = siteName + ' · Compliance Report';
+
+    const display = document.getElementById('complianceDisplay');
+
+    let gradeExplanation = '';
+    if (score === 11) gradeExplanation = 'Your website has no privacy policy, no ADA compliance, and no banner. This is a high-risk state.';
+    else if (score === 23) gradeExplanation = 'You have a privacy policy, but missing ADA compliance and a consent banner. Improve accessibility and user consent.';
+    else if (score === 50) gradeExplanation = 'You are partially compliant. Either ADA or privacy is in place, but not both. Also check your banner and state alignment.';
+    else if (score === 100) gradeExplanation = 'Congratulations! Your site has privacy policy, ADA compliance, and a banner. Fully compliant.';
+
+    if (!stateAligned) {
+      gradeExplanation += ' ⚠️ However, your compliance is not aligned with the state you operate in. ' + stateMessage;
+    }
+
+    display.innerHTML = `
+      <div class="result-content">
+        <div class="score-badge" style="background: ${score >= 80 ? '#1e6f9f' : score >= 50 ? '#e67e22' : '#c0392b'};">
+          <i class="fas fa-percent"></i> ${score}% Compliance Score
+        </div>
+        <p style="font-size: 0.85rem; margin: 4px 0 8px 0; color: #1f3c54;"><i class="fas fa-graduation-cap"></i> ${gradeExplanation}</p>
+        <ul>
+          <li><i class="fas ${hasPrivacy ? 'fa-check-circle' : 'fa-times-circle'}" style="color:${hasPrivacy ? '#27ae60' : '#c0392b'};"></i> Privacy Policy: ${hasPrivacy ? 'Present' : 'Missing'}</li>
+          <li><i class="fas ${hasADA ? 'fa-check-circle' : 'fa-times-circle'}" style="color:${hasADA ? '#27ae60' : '#c0392b'};"></i> ADA / Accessibility: ${hasADA ? 'Detected' : 'Not detected'}</li>
+          <li><i class="fas ${hasBanner ? 'fa-check-circle' : 'fa-times-circle'}" style="color:${hasBanner ? '#27ae60' : '#c0392b'};"></i> Consent Banner / ADA button: ${hasBanner ? 'Active' : 'Missing'}</li>
+        </ul>
+        <div class="compliance-note" style="border-left-color: ${stateAligned ? '#27ae60' : '#e67e22'}; background: ${stateAligned ? '#eafaf1' : '#fef9e7'};">
+          <i class="fas fa-flag-usa"></i> <strong>State alignment:</strong> ${stateAligned ? '✅ Compliant with detected state requirements.' : '⚠️ ' + stateMessage}
+          ${!stateAligned ? ' <br> <span style="font-weight:600;">To be fully compliant, update your privacy policy and/or accessibility features to match state law.</span>' : ''}
+        </div>
+        <div style="margin-top: 6px; font-size: 0.75rem; color: #2c4b66;">
+          <i class="fas fa-info-circle"></i> Audit based on URL analysis. For a full legal audit, consult a professional.
+        </div>
+      </div>
+    `;
+
+    const interestSection = document.getElementById('interestSection');
+    if (score < 80) {
+      interestSection.style.display = 'block';
+      document.getElementById('interestForm').classList.remove('open');
+    } else {
+      interestSection.style.display = 'none';
+    }
+
+    const base = 'https://webswan-compliance-audit.netlify.app/audit?';
+    const params = new URLSearchParams({
+      url: url,
+      score: score,
+      privacy: hasPrivacy ? '1' : '0',
+      ada: hasADA ? '1' : '0',
+      banner: hasBanner ? '1' : '0',
+      stateAligned: stateAligned ? '1' : '0',
+      stateMsg: stateMessage || 'none'
+    });
+    window._complianceUrl = base + params.toString();
+  }
+
+  function toggleInterestForm(show) {
+    const form = document.getElementById('interestForm');
+    if (show) {
+      form.classList.add('open');
+    } else {
+      form.classList.remove('open');
+    }
+  }
+
+  function openComplianceUrl() {
+    if (window._complianceUrl) window.open(window._complianceUrl, '_blank');
+    else alert('Please run a compliance check first.');
+  }
+
+  function copyComplianceUrl() {
+    const url = window._complianceUrl;
+    if (!url) { alert('Run a check first.'); return; }
+    navigator.clipboard?.writeText(url).then(() => {
+      const btn = document.querySelector('.compliance-module .btn-copy');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      setTimeout(() => btn.innerHTML = orig, 2000);
+    });
+  }
+
+  document.getElementById('urlInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); runComplianceCheck(); }
+  });
+
+  // ------- STATE COMPLIANCE (from original) -------
+  const stateComplianceData = {
+    'california': {
+      name: 'California',
+      regulations: [
+        'California Consumer Privacy Act (CCPA) - Requires websites to disclose data collection practices',
+        'California Online Privacy Protection Act (CalOPPA) - Requires privacy policies',
+        'ADA Title III - Web accessibility requirements for businesses',
+        'Proposition 24 (CPRA) - Enhanced privacy rights for consumers'
+      ],
+      penalties: [
+        'CCPA violations: Up to $7,500 per intentional violation',
+        'ADA lawsuits: Average settlement $25,000-$50,000',
+        'CalOPPA violations: Up to $2,500 per violation',
+        'Class action lawsuits possible for widespread non-compliance'
+      ],
+      resources: [
+        'California Attorney General website for compliance guidelines',
+        'California Privacy Protection Agency (CPPA)',
+        'ADA.gov for accessibility standards'
+      ]
+    },
+    'texas': {
+      name: 'Texas',
+      regulations: [
+        'Texas Data Privacy and Security Act (TDPSA) - Effective July 2024',
+        'Texas Privacy Protection Act - Data breach notification requirements',
+        'ADA Title III - Web accessibility requirements',
+        'Texas Business and Commerce Code Chapter 521 - Data privacy'
+      ],
+      penalties: [
+        'TDPSA violations: Up to $7,500 per violation',
+        'ADA lawsuits: Average settlement $20,000-$45,000',
+        'Data breach penalties: Up to $250,000 per breach',
+        'Attorney General enforcement actions possible'
+      ],
+      resources: [
+        'Texas Office of the Attorney General',
+        'Texas Department of Information Resources',
+        'ADA.gov for accessibility standards'
+      ]
+    },
+    'new york': {
+      name: 'New York',
+      regulations: [
+        'New York Privacy Act (NYPA) - Comprehensive data privacy legislation',
+        'New York SHIELD Act - Data breach notification and security requirements',
+        'ADA Title III - Web accessibility requirements',
+        'NYC Local Law 144 - Automated Employment Decision Tools'
+      ],
+      penalties: [
+        'SHIELD Act violations: Up to $5,000 per violation',
+        'ADA lawsuits: Average settlement $25,000-$55,000',
+        'NYPA violations: Up to $7,500 per violation',
+        'Additional civil penalties and enforcement actions'
+      ],
+      resources: [
+        'New York State Attorney General',
+        'New York Department of State',
+        'ADA.gov for accessibility standards'
+      ]
+    },
+    'florida': {
+      name: 'Florida',
+      regulations: [
+        'Florida Privacy Protection Act (FPPA) - Data privacy requirements',
+        'Florida Information Protection Act (FIPA) - Data breach notifications',
+        'ADA Title III - Web accessibility requirements',
+        'Florida Statute 501.171 - Data breach reporting'
+      ],
+      penalties: [
+        'FPPA violations: Up to $7,500 per violation',
+        'ADA lawsuits: Average settlement $20,000-$40,000',
+        'FIPA violations: Up to $500,000 per breach event',
+        'Additional civil penalties possible'
+      ],
+      resources: [
+        'Florida Attorney General',
+        'Florida Department of Legal Affairs',
+        'ADA.gov for accessibility standards'
+      ]
+    }
+  };
+
+  function getDefaultCompliance(stateName) {
+    return {
+      name: stateName,
+      regulations: [
+        'State privacy laws may apply to website operations',
+        'ADA Title III - Web accessibility requirements for businesses',
+        'State-specific data breach notification requirements',
+        'Consumer protection laws regarding online practices'
+      ],
+      penalties: [
+        'ADA lawsuits: Average settlement $20,000-$50,000',
+        'Privacy violations: Up to $7,500 per violation',
+        'Data breach penalties vary by state',
+        'Attorney General enforcement actions possible'
+      ],
+      resources: [
+        'State Attorney General website',
+        'State Department of Commerce or Consumer Affairs',
+        'ADA.gov for accessibility standards'
+      ]
+    };
+  }
+
+  let currentSearchUrl = '';
+  let currentStateName = '';
+
+  function searchStateCompliance() {
+    const val = document.getElementById('stateInput').value.trim();
+    if (!val) { document.getElementById('stateInput').focus(); return; }
+
+    currentStateName = val;
+    const searchUrl = `https://www.google.com/search?q=state+of+${encodeURIComponent(val)}+website+compliance+penalty`;
+    currentSearchUrl = searchUrl;
+
+    document.getElementById('selectedStateName').innerText = val + ' Compliance Results';
+    document.getElementById('stateResult').classList.add('show');
+
+    const stateKey = val.toLowerCase().trim();
+    let data = stateComplianceData[stateKey];
+    if (!data) {
+      data = getDefaultCompliance(val);
+    }
+
+    const display = document.getElementById('stateComplianceDisplay');
+    display.innerHTML = `
+      <div class="result-content">
+        <span class="state-badge" style="display:inline-block;background:linear-gradient(45deg,#0a1e2f,#1e6f9f);color:white;padding:2px 12px;border-radius:20px;font-weight:700;font-size:0.7rem;margin-bottom:8px;"><i class="fas fa-flag-usa"></i> ${data.name}</span>
+        <h3><i class="fas fa-gavel" style="color:#1e6f9f;"></i> Regulations & Requirements</h3>
+        <ul>
+          ${data.regulations.map(reg => `<li><i class="fas fa-check-circle"></i> ${reg}</li>`).join('')}
+        </ul>
+        <div style="margin: 10px 0;">
+          <h3><i class="fas fa-exclamation-triangle" style="color:#e74c3c;"></i> Potential Penalties</h3>
+          <ul>
+            ${data.penalties.map(pen => `<li><i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i> ${pen}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="compliance-note">
+          <i class="fas fa-info-circle" style="color:#1e6f9f;"></i>
+          <strong>Resources:</strong> ${data.resources.join(' • ')}
+        </div>
+        <div class="compliance-note" style="border-left-color: #e74c3c; background: #fdf0ef;">
+          <i class="fas fa-shield-halved" style="color:#e74c3c;"></i>
+          <strong>Important:</strong> This is general information. For specific legal advice, please consult with a qualified attorney familiar with ${data.name} laws.
+        </div>
+      </div>
+    `;
+  }
+
+  function openStateSearch() {
+    if (currentSearchUrl) {
+      window.open(currentSearchUrl, '_blank');
+    }
+  }
+
+  function copyStateLink() {
+    const url = currentSearchUrl;
+    if (!url) return;
+    navigator.clipboard?.writeText(url).then(() => {
+      const btn = document.querySelector('.state-module .btn-copy');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      setTimeout(() => btn.innerHTML = orig, 2000);
+    });
+  }
+
+  document.getElementById('stateInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); searchStateCompliance(); }
+  });
+</script>
+</body>
+</html>
