@@ -1,212 +1,218 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>The WebSwan · Website Compliance Checker</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#0b1b2f;color:#0a1e2f;min-height:100vh;padding:24px}
-    .card{max-width:960px;margin:auto;background:#fff;border-radius:30px;padding:30px;box-shadow:0 20px 40px -8px #00142899}
-    .topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;border-bottom:3px solid #1e6f9f;padding-bottom:16px;margin-bottom:22px;flex-wrap:wrap}
-    .brand h1{font-size:1.7rem}.brand h1 span,.accent{color:#1e6f9f}.brand p{color:#2c4b66;font-size:.88rem}
-    .topbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-    .language-wrap{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700}
-    .language-wrap select,.field,select,textarea{border:2px solid #d0dcec;background:#fff;color:#0a1e2f;border-radius:12px;padding:11px 13px;font:inherit;outline:none}
-    .language-wrap select:focus,.field:focus,select:focus,textarea:focus{border-color:#1e6f9f;box-shadow:0 0 0 4px #1e6f9f1f}
-    .btn-ocean{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#006994,#0077be,#1a8cba);color:#fff;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.85rem;transition:all 0.3s;border:none;cursor:pointer;white-space:nowrap}
-    .btn-ocean:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,105,148,0.5);background:linear-gradient(135deg,#0077be,#0088cc,#1a8cba)}
-    .btn-ocean i{font-size:1rem}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
-    .module{background:#f5faff;border:1px solid #e0edf7;border-radius:20px;padding:20px}
-    .module h2{font-size:1.08rem;margin-bottom:8px}
-    .module h2 i{color:#1e6f9f;margin-right:7px}
-    .module p{color:#1f3c54;line-height:1.5;font-size:.88rem}
-    .resource{display:inline-flex;margin-top:14px;gap:7px;align-items:center;border:2px solid #b2d6ed;border-radius:999px;padding:8px 15px;color:#0a1e2f;text-decoration:none;font-size:.82rem;font-weight:700}
-    .resource:hover{background:#0a1e2f;color:#fff}
-    .webswan{text-align:center;border-top:2px solid #dbeaf5;padding:16px 0}
-    .webswan p{color:#2c4b66;font-size:.88rem}
-    .instructions{margin-bottom:13px}
-    .url-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .url-combo{display:flex;align-items:center;flex:1;min-width:200px;border:2px solid #d0dcec;background:#fff;border-radius:999px;overflow:hidden}
-    .url-combo:focus-within{border-color:#1e6f9f;box-shadow:0 0 0 4px #1e6f9f1f}
-    .url-combo input{flex:1;min-width:90px;border:0;outline:0;padding:11px 17px;font:inherit;color:#0a1e2f;background:transparent}
-    .primary{border:0;border-radius:999px;padding:11px 25px;background:linear-gradient(45deg,#0a1e2f,#1e6f9f);color:#fff;font-weight:800;cursor:pointer;white-space:nowrap}
-    .primary:disabled{opacity:.55;cursor:wait}
-    .notice{font-size:.78rem;color:#37566e;margin-top:10px}
-    .result{display:none;margin-top:16px;border:2px solid #e0e0e0;border-radius:14px;overflow:hidden}
-    .result.show{display:block}
-    .result-head{background:linear-gradient(90deg,#0a1e2f,#1e6f9f);color:#fff;padding:10px 16px;font-weight:800}
-    .result-body{padding:15px;background:#fafcff}
-    .status{padding:12px;border-radius:10px;background:#fff;border:1px solid #dce8f1;margin-bottom:12px;line-height:1.5}
-    .score{display:inline-flex;align-items:center;gap:7px;background:#0a1e2f;color:#fff;border-radius:999px;padding:5px 14px;font-size:1.05rem;font-weight:800;margin-bottom:9px}
-    .checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .check{background:#fff;border:1px solid #dce8f1;border-radius:10px;padding:10px;font-size:.8rem;color:#1f3c54}
-    .check i{margin-right:6px}
-    .pass i{color:#17864a}.warn i{color:#c46a00}.fail i{color:#b52d21}.manual i{color:#1e6f9f}
-    .evidence{display:block;margin-top:4px;color:#63798b;font-size:.73rem}
-    .report-actions-top{display:none;margin-top:14px;padding:14px;border:2px solid #b8d9ec;border-radius:16px;background:#eef8ff;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
-    .report-actions-top.show{display:flex}
-    .report-actions-top p{flex:1;min-width:200px;color:#1f3c54;font-size:.82rem;font-weight:700;text-align:center}
-    .secret-btn{background:transparent;border:2px dashed #b8d9ec;border-radius:999px;padding:10px 30px;color:#b8d9ec;font-weight:400;cursor:pointer;font-size:.8rem;transition:all 0.3s;opacity:0.3;letter-spacing:2px}
-    .secret-btn:hover{opacity:0.6;border-color:#1e6f9f;color:#1e6f9f}
-    .secret-btn.revealed{opacity:1;border-color:#1e6f9f;color:#0a1e2f;background:#fff;font-weight:700;border-style:solid}
-    .secret-btn.revealed:hover{background:#0a1e2f;color:#fff}
-    .secret-counter{font-size:.65rem;color:#b8d9ec;opacity:0.5;margin-left:8px}
-    .request{display:none;margin-top:18px;border-top:2px dashed #d0dcec;padding-top:16px}
-    .request.show{display:block}
-    .request h3{font-size:1rem;margin-bottom:10px}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .full{grid-column:1/-1}
-    .field,select,textarea{width:100%;font-size:.85rem}
-    textarea{min-height:85px;resize:vertical}
-    .consent{display:flex;gap:9px;align-items:flex-start;font-size:.75rem;color:#37566e}
-    .consent input{margin-top:3px}
-    .consent a{color:#1e6f9f}
-    .form-message{font-size:.8rem;font-weight:700}
-    .export-report{position:fixed;left:-12000px;top:0;width:760px;background:#fff;color:#12263a;padding:40px;font-family:Arial,sans-serif;line-height:1.45}
-    .export-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding-bottom:18px;border-bottom:4px solid #1e6f9f}
-    .export-brand{font-size:26px;font-weight:800;color:#0a1e2f}
-    .export-brand span{color:#1e6f9f}
-    .export-kicker{color:#547087;font-size:12px;text-transform:uppercase;letter-spacing:1.2px}
-    .export-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .export-meta div,.export-request div{border:1px solid #d8e6f0;border-radius:8px;padding:10px}
-    .export-label{display:block;color:#667d8f;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
-    .export-score{margin:18px 0;background:linear-gradient(100deg,#0a1e2f,#1e6f9f);color:#fff;border-radius:12px;padding:18px;display:flex;justify-content:space-between;align-items:center}
-    .export-score strong{font-size:32px}
-    .export-section{margin-top:20px}
-    .export-section h2{font-size:16px;color:#0a1e2f;border-bottom:2px solid #c7e1f1;padding-bottom:6px;margin-bottom:10px}
-    .export-check{break-inside:avoid;border:1px solid #d8e6f0;border-left:5px solid #1e6f9f;border-radius:8px;padding:10px;margin-bottom:7px;font-size:11px}
-    .export-check.pass{border-left-color:#17864a}
-    .export-check.warn{border-left-color:#c46a00}
-    .export-check.fail{border-left-color:#b52d21}
-    .export-check.manual{border-left-color:#1e6f9f}
-    .export-check small{display:block;color:#63798b;margin-top:3px}
-    .export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .export-request .wide{grid-column:1/-1}
-    .export-disclaimer{margin-top:20px;background:#f5f9fc;border-radius:8px;padding:12px;color:#4f687c;font-size:10px}
-    .export-footer{margin-top:18px;padding-top:10px;border-top:1px solid #cbdce8;display:flex;justify-content:space-between;color:#4f687c;font-size:10px}
-    .state-row{display:flex;gap:10px;flex-wrap:wrap}
-    .state-row select{flex:1;border-radius:999px;min-width:180px;padding:11px 17px}
-    .state-result{display:none;margin-top:13px;padding:16px;background:#f8faff;border:2px solid #dce8f1;border-radius:12px;font-size:.85rem;line-height:1.6}
-    .state-result.show{display:block}
-    .state-result h3{color:#1e6f9f;margin-bottom:6px;font-size:1rem}
-    .state-result .penalty{background:#fff3e0;border-left:4px solid #e65100;padding:10px 14px;border-radius:6px;margin:8px 0}
-    .state-result .requirement{background:#e3f2fd;border-left:4px solid #0d47a1;padding:10px 14px;border-radius:6px;margin:8px 0}
-    .state-result .link-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
-    .state-result .link-list a{background:#1e6f9f;color:#fff;padding:6px 14px;border-radius:999px;text-decoration:none;font-size:.78rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s}
-    .state-result .link-list a:hover{background:#0a1e2f;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-    .state-result .link-list a i{font-size:.7rem}
-    .pricing-buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:20px 0}
-    .pricing-buttons a{display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.9rem;transition:all 0.3s}
-    .pricing-buttons .btn-primary{background:linear-gradient(45deg,#0a1e2f,#1e6f9f);color:#fff}
-    .pricing-buttons .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(30,111,159,0.4)}
-    .footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:2px solid #dbeaf5;padding-top:15px;color:#1f4763;font-size:.78rem}
-    .footer a{color:#1e6f9f;text-decoration:none}
-    .footer a:hover{text-decoration:underline}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media(max-width:700px){body{padding:12px}.card{padding:20px 15px}.topbar{flex-direction:column;align-items:stretch}.topbar-right{justify-content:center;flex-wrap:wrap}.grid,.checks,.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.url-row,.state-row{flex-direction:column}.primary{width:100%}.report-actions-top{align-items:stretch}.report-actions-top p{min-width:100%}.secret-btn{width:100%;justify-content:center}.state-result .link-list a{width:100%;justify-content:center}.pricing-buttons{flex-direction:column;align-items:stretch}.pricing-buttons a{justify-content:center}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The WebSwan · Website Compliance Checker</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#0b1b2f;color:#0a1e2f;min-height:100vh;padding:24px}
+.card{max-width:960px;margin:auto;background:#fff;border-radius:30px;padding:30px;box-shadow:0 20px 40px -8px #00142899}
+.topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;border-bottom:3px solid #1e6f9f;padding-bottom:16px;margin-bottom:22px;flex-wrap:wrap}
+.brand h1{font-size:1.7rem}.brand h1 span,.accent{color:#1e6f9f}.brand p{color:#2c4b66;font-size:.88rem}
+.topbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.language-wrap{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700}
+.language-wrap select,.field,select,textarea{border:2px solid #d0dcec;background:#fff;color:#0a1e2f;border-radius:12px;padding:11px 13px;font:inherit;outline:none}
+.language-wrap select:focus,.field:focus,select:focus,textarea:focus{border-color:#1e6f9f;box-shadow:0 0 0 4px #1e6f9f1f}
+.btn-ocean{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#006994,#0077be,#1a8cba);color:#fff;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.85rem;transition:all 0.3s;border:none;cursor:pointer;white-space:nowrap}
+.btn-ocean:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,105,148,0.5);background:linear-gradient(135deg,#0077be,#0088cc,#1a8cba)}
+.btn-ocean i{font-size:1rem}
+.btn-alignable{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0f9d8a,#12b3a0,#2fd0bb);color:#fff;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.85rem;transition:all 0.3s;border:none;cursor:pointer;white-space:nowrap}
+.btn-alignable:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(15,157,138,0.5);background:linear-gradient(135deg,#12b3a0,#17c2ac,#2fd0bb)}
+.btn-alignable i{font-size:1rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.module{background:#f5faff;border:1px solid #e0edf7;border-radius:20px;padding:20px}
+.module h2{font-size:1.08rem;margin-bottom:8px}
+.module h2 i{color:#1e6f9f;margin-right:7px}
+.module p{color:#1f3c54;line-height:1.5;font-size:.88rem}
+.resource{display:inline-flex;margin-top:14px;gap:7px;align-items:center;border:2px solid #b2d6ed;border-radius:999px;padding:8px 15px;color:#0a1e2f;text-decoration:none;font-size:.82rem;font-weight:700}
+.resource:hover{background:#0a1e2f;color:#fff}
+.webswan{text-align:center;border-top:2px solid #dbeaf5;padding:16px 0}
+.webswan p{color:#2c4b66;font-size:.88rem}
+.instructions{margin-bottom:13px}
+.url-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.url-combo{display:flex;align-items:center;flex:1;min-width:200px;border:2px solid #d0dcec;background:#fff;border-radius:999px;overflow:hidden}
+.url-combo:focus-within{border-color:#1e6f9f;box-shadow:0 0 0 4px #1e6f9f1f}
+.url-combo input{flex:1;min-width:90px;border:0;outline:0;padding:11px 17px;font:inherit;color:#0a1e2f;background:transparent}
+.primary{border:0;border-radius:999px;padding:11px 25px;background:linear-gradient(45deg,#0a1e2f,#1e6f9f);color:#fff;font-weight:800;cursor:pointer;white-space:nowrap}
+.primary:disabled{opacity:.55;cursor:wait}
+.notice{font-size:.78rem;color:#37566e;margin-top:10px}
+.result{display:none;margin-top:16px;border:2px solid #e0e0e0;border-radius:14px;overflow:hidden}
+.result.show{display:block}
+.result-head{background:linear-gradient(90deg,#0a1e2f,#1e6f9f);color:#fff;padding:10px 16px;font-weight:800}
+.result-body{padding:15px;background:#fafcff}
+.status{padding:12px;border-radius:10px;background:#fff;border:1px solid #dce8f1;margin-bottom:12px;line-height:1.5}
+.score{display:inline-flex;align-items:center;gap:7px;background:#0a1e2f;color:#fff;border-radius:999px;padding:5px 14px;font-size:1.05rem;font-weight:800;margin-bottom:9px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{background:#fff;border:1px solid #dce8f1;border-radius:10px;padding:10px;font-size:.8rem;color:#1f3c54}
+.check i{margin-right:6px}
+.pass i{color:#17864a}.warn i{color:#c46a00}.fail i{color:#b52d21}.manual i{color:#1e6f9f}
+.evidence{display:block;margin-top:4px;color:#63798b;font-size:.73rem}
+.report-actions-top{display:none;margin-top:14px;padding:14px;border:2px solid #b8d9ec;border-radius:16px;background:#eef8ff;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+.report-actions-top.show{display:flex}
+.report-actions-top p{flex:1;min-width:200px;color:#1f3c54;font-size:.82rem;font-weight:700;text-align:center}
+.secret-btn{background:transparent;border:2px dashed #b8d9ec;border-radius:999px;padding:10px 30px;color:#b8d9ec;font-weight:400;cursor:pointer;font-size:.8rem;transition:all 0.3s;opacity:0.3;letter-spacing:2px}
+.secret-btn:hover{opacity:0.6;border-color:#1e6f9f;color:#1e6f9f}
+.secret-btn.revealed{opacity:1;border-color:#1e6f9f;color:#0a1e2f;background:#fff;font-weight:700;border-style:solid}
+.secret-btn.revealed:hover{background:#0a1e2f;color:#fff}
+.secret-counter{font-size:.65rem;color:#b8d9ec;opacity:0.5;margin-left:8px}
+.request{display:none;margin-top:18px;border-top:2px dashed #d0dcec;padding-top:16px}
+.request.show{display:block}
+.request h3{font-size:1rem;margin-bottom:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+.field,select,textarea{width:100%;font-size:.85rem}
+textarea{min-height:85px;resize:vertical}
+.consent{display:flex;gap:9px;align-items:flex-start;font-size:.75rem;color:#37566e}
+.consent input{margin-top:3px}
+.consent a{color:#1e6f9f}
+.form-message{font-size:.8rem;font-weight:700}
+.export-report{position:fixed;left:-12000px;top:0;width:760px;background:#fff;color:#12263a;padding:40px;font-family:Arial,sans-serif;line-height:1.45}
+.export-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding-bottom:18px;border-bottom:4px solid #1e6f9f}
+.export-brand{font-size:26px;font-weight:800;color:#0a1e2f}
+.export-brand span{color:#1e6f9f}
+.export-kicker{color:#547087;font-size:12px;text-transform:uppercase;letter-spacing:1.2px}
+.export-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.export-meta div,.export-request div{border:1px solid #d8e6f0;border-radius:8px;padding:10px}
+.export-label{display:block;color:#667d8f;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.export-score{margin:18px 0;background:linear-gradient(100deg,#0a1e2f,#1e6f9f);color:#fff;border-radius:12px;padding:18px;display:flex;justify-content:space-between;align-items:center}
+.export-score strong{font-size:32px}
+.export-section{margin-top:20px}
+.export-section h2{font-size:16px;color:#0a1e2f;border-bottom:2px solid #c7e1f1;padding-bottom:6px;margin-bottom:10px}
+.export-check{break-inside:avoid;border:1px solid #d8e6f0;border-left:5px solid #1e6f9f;border-radius:8px;padding:10px;margin-bottom:7px;font-size:11px}
+.export-check.pass{border-left-color:#17864a}
+.export-check.warn{border-left-color:#c46a00}
+.export-check.fail{border-left-color:#b52d21}
+.export-check.manual{border-left-color:#1e6f9f}
+.export-check small{display:block;color:#63798b;margin-top:3px}
+.export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.export-request .wide{grid-column:1/-1}
+.export-disclaimer{margin-top:20px;background:#f5f9fc;border-radius:8px;padding:12px;color:#4f687c;font-size:10px}
+.export-footer{margin-top:18px;padding-top:10px;border-top:1px solid #cbdce8;display:flex;justify-content:space-between;color:#4f687c;font-size:10px}
+.state-row{display:flex;gap:10px;flex-wrap:wrap}
+.state-row select{flex:1;border-radius:999px;min-width:180px;padding:11px 17px}
+.state-result{display:none;margin-top:13px;padding:16px;background:#f8faff;border:2px solid #dce8f1;border-radius:12px;font-size:.85rem;line-height:1.6}
+.state-result.show{display:block}
+.state-result h3{color:#1e6f9f;margin-bottom:6px;font-size:1rem}
+.state-result .penalty{background:#fff3e0;border-left:4px solid #e65100;padding:10px 14px;border-radius:6px;margin:8px 0}
+.state-result .requirement{background:#e3f2fd;border-left:4px solid #0d47a1;padding:10px 14px;border-radius:6px;margin:8px 0}
+.state-result .link-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.state-result .link-list a{background:#1e6f9f;color:#fff;padding:6px 14px;border-radius:999px;text-decoration:none;font-size:.78rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s}
+.state-result .link-list a:hover{background:#0a1e2f;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.state-result .link-list a i{font-size:.7rem}
+.pricing-buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:20px 0}
+.pricing-buttons a{display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.9rem;transition:all 0.3s}
+.pricing-buttons .btn-primary{background:linear-gradient(45deg,#0a1e2f,#1e6f9f);color:#fff}
+.pricing-buttons .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(30,111,159,0.4)}
+.footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:2px solid #dbeaf5;padding-top:15px;color:#1f4763;font-size:.78rem}
+.footer a{color:#1e6f9f;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:700px){body{padding:12px}.card{padding:20px 15px}.topbar{flex-direction:column;align-items:stretch}.topbar-right{justify-content:center;flex-wrap:wrap}.grid,.checks,.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.url-row,.state-row{flex-direction:column}.primary{width:100%}.report-actions-top{align-items:stretch}.report-actions-top p{min-width:100%}.secret-btn{width:100%;justify-content:center}.state-result .link-list a{width:100%;justify-content:center}.pricing-buttons{flex-direction:column;align-items:stretch}.pricing-buttons a{justify-content:center}}
+</style>
 </head>
 <body>
 <main class="card">
-  <header class="topbar">
-    <div class="brand">
-      <h1>The WebSwan <span data-i18n="insights">Digital Insights</span></h1>
-      <p data-i18n="subtitle">Website accessibility · Privacy · Consent</p>
-    </div>
-    <div class="topbar-right">
-      <a class="btn-ocean" href="https://share.google/aimode/aQTUxa6WMGy99dScS" target="_blank" rel="noopener">
-        <i class="fa-solid fa-brain"></i> The WebSwan Google AI Insight Click Here
-      </a>
-      <label class="language-wrap" for="language">
-        <i class="fa-solid fa-language"></i>
-        <span data-i18n="language">Language</span>
-        <select id="language"><option value="en">English</option><option value="es">Español</option></select>
-      </label>
-    </div>
-  </header>
+<header class="topbar">
+<div class="brand">
+<h1>The WebSwan <span data-i18n="insights">Digital Insights</span></h1>
+<p data-i18n="subtitle">Website accessibility · Privacy · Consent</p>
+</div>
+<div class="topbar-right">
+<a class="btn-alignable" href="https://www.alignable.com/oakland-ca/the-webswan-helping-small-businesses-capture-more-customers-save-time-and-grow?user=14286344" target="_blank" rel="noopener">
+<i class="fa-solid fa-thumbs-up"></i> Recommend Us on Alignable
+</a>
+<a class="btn-ocean" href="https://share.google/aimode/aQTUxa6WMGy99dScS" target="_blank" rel="noopener">
+<i class="fa-solid fa-brain"></i> The WebSwan Google AI Insight Click Here
+</a>
+<label class="language-wrap" for="language">
+<i class="fa-solid fa-language"></i>
+<span data-i18n="language">Language</span>
+<select id="language"><option value="en">English</option><option value="es">Español</option></select>
+</label>
+</div>
+</header>
 
-  <section class="grid" aria-label="Resources">
-    <article class="module"><h2><i class="fa-brands fa-google"></i><span data-i18n="googleTitle">Google Updates</span></h2><p data-i18n="googleText">Track confirmed Google search changes and expert analysis.</p><a class="resource" href="https://www.seroundtable.com/category/google-updates" target="_blank" rel="noopener"><span data-i18n="visitHub">Visit hub</span> <i class="fa-solid fa-arrow-right"></i></a></article>
-    <article class="module"><h2><i class="fa-solid fa-universal-access"></i><span data-i18n="adaTitle">ADA Resource</span></h2><p data-i18n="adaText">Official U.S. Department of Justice web accessibility guidance.</p><a class="resource" href="https://www.ada.gov/resources/web-guidance/" target="_blank" rel="noopener"><span data-i18n="readGuide">Read the guidance</span> <i class="fa-solid fa-arrow-right"></i></a></article>
-  </section>
+<section class="grid" aria-label="Resources">
+<article class="module"><h2><i class="fa-brands fa-google"></i><span data-i18n="googleTitle">Google Updates</span></h2><p data-i18n="googleText">Track confirmed Google search changes and expert analysis.</p><a class="resource" href="https://www.seroundtable.com/category/google-updates" target="_blank" rel="noopener"><span data-i18n="visitHub">Visit hub</span> <i class="fa-solid fa-arrow-right"></i></a></article>
+<article class="module"><h2><i class="fa-solid fa-universal-access"></i><span data-i18n="adaTitle">ADA Resource</span></h2><p data-i18n="adaText">Official U.S. Department of Justice web accessibility guidance.</p><a class="resource" href="https://www.ada.gov/resources/web-guidance/" target="_blank" rel="noopener"><span data-i18n="readGuide">Read the guidance</span> <i class="fa-solid fa-arrow-right"></i></a></article>
+</section>
 
-  <div class="webswan"><h2><i class="fa-solid fa-feather accent"></i> The WebSwan</h2><p data-i18n="tagline">Your Path to a Stronger Online Presence</p></div>
+<div class="webswan"><h2><i class="fa-solid fa-feather accent"></i> The WebSwan</h2><p data-i18n="tagline">Your Path to a Stronger Online Presence</p></div>
 
-  <section class="module" aria-labelledby="checkerTitle">
-    <h2 id="checkerTitle"><i class="fa-solid fa-shield-halved"></i><span data-i18n="checkerTitle">Website Compliance Checker</span></h2>
-    <p class="instructions" data-i18n="checkerIntro">Enter a website address. We inspect available live website evidence; we do not guess from the URL.</p>
-    <div class="url-row">
-      <label class="url-combo" style="flex:1;min-width:200px">
-        <span class="sr-only" data-i18n="websiteLabel">Website address</span>
-        <input id="urlInput" type="text" inputmode="url" autocomplete="url" placeholder="https://www.business.com" aria-label="Website address" style="padding:11px 17px;">
-      </label>
-      <button id="analyzeBtn" class="primary" type="button"><i class="fa-solid fa-robot"></i> <span data-i18n="analyze">Analyze</span></button>
-    </div>
-    <p class="notice"><i class="fa-solid fa-circle-info"></i> <span data-i18n="auditNotice">Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.</span></p>
+<section class="module" aria-labelledby="checkerTitle">
+<h2 id="checkerTitle"><i class="fa-solid fa-shield-halved"></i><span data-i18n="checkerTitle">Website Compliance Checker</span></h2>
+<p class="instructions" data-i18n="checkerIntro">Enter a website address. We inspect available live website evidence; we do not guess from the URL.</p>
+<div class="url-row">
+<label class="url-combo" style="flex:1;min-width:200px">
+<span class="sr-only" data-i18n="websiteLabel">Website address</span>
+<input id="urlInput" type="text" inputmode="url" autocomplete="url" placeholder="https://www.business.com" aria-label="Website address" style="padding:11px 17px;">
+</label>
+<button id="analyzeBtn" class="primary" type="button"><i class="fa-solid fa-robot"></i> <span data-i18n="analyze">Analyze</span></button>
+</div>
+<p class="notice"><i class="fa-solid fa-circle-info"></i> <span data-i18n="auditNotice">Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.</span></p>
 
-    <div id="result" class="result" aria-live="polite">
-      <div class="result-head"><i class="fa-solid fa-clipboard-list"></i> <span id="resultTitle" data-i18n="report">Website Screening Report</span></div>
-      <div class="result-body">
-        <div id="summary" class="status"></div>
-        <div id="checks" class="checks"></div>
-        
-        <div id="reportActionsTop" class="report-actions-top">
-          <p><i class="fa-solid fa-circle-check"></i> <span data-i18n="reportReady">Your professional report is ready.</span></p>
-          <button id="secretPrintBtn" class="secret-btn" type="button">
-            <i class="fa-solid fa-print"></i> <span id="secretBtnText">•••••••</span>
-            <span class="secret-counter" id="clickCounter"></span>
-          </button>
-        </div>
-      </div>
-    </div>
+<div id="result" class="result" aria-live="polite">
+<div class="result-head"><i class="fa-solid fa-clipboard-list"></i> <span id="resultTitle" data-i18n="report">Website Screening Report</span></div>
+<div class="result-body">
+<div id="summary" class="status"></div>
+<div id="checks" class="checks"></div>
 
-    <section id="requestSection" class="request">
-      <h3 data-i18n="requestTitle">Would you like help with the findings?</h3>
-      <form id="requestForm" name="compliance-help" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-        <input type="hidden" name="form-name" value="compliance-help"><p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
-        <div class="form-grid">
-          <label><span class="sr-only" data-i18n="name">Full name</span><input class="field" name="name" required data-i18n-placeholder="name" placeholder="Full name"></label>
-          <label><span class="sr-only" data-i18n="phone">Phone number</span><input class="field" name="phone" type="tel" required data-i18n-placeholder="phone" placeholder="Phone number"></label>
-          <label><span class="sr-only" data-i18n="email">Email address</span><input class="field" name="email" type="email" required data-i18n-placeholder="email" placeholder="Email address"></label>
-          <label><span class="sr-only" data-i18n="business">Business name</span><input class="field" name="business" required data-i18n-placeholder="business" placeholder="Business name"></label>
-          <label class="full"><span class="sr-only" data-i18n="website">Website</span><input id="requestWebsite" class="field" name="website" readonly data-i18n-placeholder="website" placeholder="Website"></label>
-          <input id="requestWebsiteHidden" name="website" type="hidden">
-          <label class="full"><span class="sr-only" data-i18n="service">Service needed</span><select name="service" required><option value="" data-i18n="chooseService">Choose a service</option><option data-i18n="fullAnalysis">Full Website Analysis</option><option data-i18n="audit">Compliance Audit</option><option data-i18n="demo">Complimentary Website Demo</option><option data-i18n="phoneApp">Custom Phone Application</option><option data-i18n="receptionist">Virtual Receptionist</option><option data-i18n="social">Social Media Marketing</option><option data-i18n="advertising">Online Advertising</option><option data-i18n="other">Other</option></select></label>
-          <label class="full"><span class="sr-only" data-i18n="message">How can we help?</span><textarea name="message" maxlength="1500" data-i18n-placeholder="message" placeholder="How can we help?"></textarea></label>
-          <label class="consent full"><input type="checkbox" name="consent" required><span data-i18n-html="consent">I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
-          <button class="primary full" type="submit"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendRequest">Request Help</span></button>
-          <p id="formMessage" class="form-message full" aria-live="polite"></p>
-        </div>
-      </form>
-    </section>
-  </section>
+<div id="reportActionsTop" class="report-actions-top">
+<p><i class="fa-solid fa-circle-check"></i> <span data-i18n="reportReady">Your professional report is ready.</span></p>
+<button id="secretPrintBtn" class="secret-btn" type="button">
+<i class="fa-solid fa-print"></i> <span id="secretBtnText">🔑🔑🔑</span>
+<span class="secret-counter" id="clickCounter"></span>
+</button>
+</div>
+</div>
+</div>
 
-  <article id="pdfReport" class="export-report" aria-hidden="true"></article>
+<section id="requestSection" class="request">
+<h3 data-i18n="requestTitle">Would you like help with the findings?</h3>
+<form id="requestForm" name="compliance-help" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+<input type="hidden" name="form-name" value="compliance-help"><p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
+<div class="form-grid">
+<label><span class="sr-only" data-i18n="name">Full name</span><input class="field" name="name" required data-i18n-placeholder="name" placeholder="Full name"></label>
+<label><span class="sr-only" data-i18n="phone">Phone number</span><input class="field" name="phone" type="tel" required data-i18n-placeholder="phone" placeholder="Phone number"></label>
+<label><span class="sr-only" data-i18n="email">Email address</span><input class="field" name="email" type="email" required data-i18n-placeholder="email" placeholder="Email address"></label>
+<label><span class="sr-only" data-i18n="business">Business name</span><input class="field" name="business" required data-i18n-placeholder="business" placeholder="Business name"></label>
+<label class="full"><span class="sr-only" data-i18n="website">Website</span><input id="requestWebsite" class="field" name="website" readonly data-i18n-placeholder="website" placeholder="Website"></label>
+<input id="requestWebsiteHidden" name="website" type="hidden">
+<label class="full"><span class="sr-only" data-i18n="service">Service needed</span><select name="service" required><option value="" data-i18n="chooseService">Choose a service</option><option data-i18n="fullAnalysis">Full Website Analysis</option><option data-i18n="audit">Compliance Audit</option><option data-i18n="demo">Complimentary Website Demo</option><option data-i18n="phoneApp">Custom Phone Application</option><option data-i18n="receptionist">Virtual Receptionist</option><option data-i18n="social">Social Media Marketing</option><option data-i18n="advertising">Online Advertising</option><option data-i18n="other">Other</option></select></label>
+<label class="full"><span class="sr-only" data-i18n="message">How can we help?</span><textarea name="message" maxlength="1500" data-i18n-placeholder="message" placeholder="How can we help?"></textarea></label>
+<label class="consent full"><input type="checkbox" name="consent" required><span data-i18n-html="consent">I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
+<button class="primary full" type="submit"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sendRequest">Request Help</span></button>
+<p id="formMessage" class="form-message full" aria-live="polite"></p>
+</div>
+</form>
+</section>
+</section>
 
-  <section class="module" style="margin-top:18px" aria-labelledby="stateTitle">
-    <h2 id="stateTitle"><i class="fa-solid fa-gavel"></i><span data-i18n="stateTitle">Jurisdiction Information</span></h2>
-    <p class="instructions" data-i18n="stateIntro">Select the state where your business operates to see specific compliance requirements, penalties, and official resources.</p>
-    <div class="state-row">
-      <select id="jurisdiction" aria-label="Jurisdiction"></select>
-      <button id="stateBtn" class="primary" type="button"><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="viewInfo">View Information</span></button>
-    </div>
-    <div id="stateResult" class="state-result" aria-live="polite"></div>
-  </section>
+<article id="pdfReport" class="export-report" aria-hidden="true"></article>
 
-  <div class="pricing-buttons">
-    <a class="btn-primary" href="https://webswan-pricing-booking.netlify.app/" target="_blank" rel="noopener"><i class="fa-solid fa-hand-point-right"></i><span data-i18n="packages">View Website Packages</span></a>
-  </div>
+<section class="module" style="margin-top:18px" aria-labelledby="stateTitle">
+<h2 id="stateTitle"><i class="fa-solid fa-gavel"></i><span data-i18n="stateTitle">Jurisdiction Information</span></h2>
+<p class="instructions" data-i18n="stateIntro">Select the state where your business operates to see specific compliance requirements, penalties, and official resources.</p>
+<div class="state-row">
+<select id="jurisdiction" aria-label="Jurisdiction"></select>
+<button id="stateBtn" class="primary" type="button"><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="viewInfo">View Information</span></button>
+</div>
+<div id="stateResult" class="state-result" aria-live="polite"></div>
+</section>
 
-  <footer class="footer"><span>© 2026 The WebSwan</span><a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener" data-i18n="privacy">Privacy Policy</a></footer>
+<div class="pricing-buttons">
+<a class="btn-primary" href="https://webswan-pricing-booking.netlify.app/" target="_blank" rel="noopener"><i class="fa-solid fa-hand-point-right"></i><span data-i18n="packages">View Website Packages</span></a>
+</div>
+
+<footer class="footer"><span>© 2026 The WebSwan</span><a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener" data-i18n="privacy">Privacy Policy</a></footer>
 </main>
 
 <script>
-// SECRET BUTTON - 7 clicks to reveal
+// SECRET BUTTON - 3 clicks to reveal (key emoji)
 let secretClicks = 0;
-const SECRET_THRESHOLD = 7;
+const SECRET_THRESHOLD = 3;
 const secretBtn = document.getElementById('secretPrintBtn');
 const secretBtnText = document.getElementById('secretBtnText');
 const clickCounter = document.getElementById('clickCounter');
@@ -214,29 +220,29 @@ const clickCounter = document.getElementById('clickCounter');
 clickCounter.textContent = '';
 
 secretBtn.addEventListener('click', function(e) {
-  e.stopPropagation();
-  if (this.classList.contains('revealed')) {
-    printReport();
-    return;
-  }
-  secretClicks++;
-  const remaining = SECRET_THRESHOLD - secretClicks;
-  if (remaining > 0) {
-    let dots = '';
-    for (let i = 0; i < remaining; i++) dots += '•';
-    secretBtnText.textContent = dots;
-    clickCounter.textContent = '';
-    this.style.transform = 'scale(0.95)';
-    setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
-  }
-  if (secretClicks >= SECRET_THRESHOLD) {
-    this.classList.add('revealed');
-    secretBtnText.innerHTML = '<i class="fa-solid fa-print"></i> Print / Save as PDF';
-    clickCounter.textContent = '🔓';
-    this.style.transform = 'scale(1.05)';
-    setTimeout(() => { this.style.transform = 'scale(1)'; }, 200);
-    setTimeout(() => { printReport(); }, 400);
-  }
+e.stopPropagation();
+if (this.classList.contains('revealed')) {
+printReport();
+return;
+}
+secretClicks++;
+const remaining = SECRET_THRESHOLD - secretClicks;
+if (remaining > 0) {
+let keys = '';
+for (let i = 0; i < remaining; i++) keys += '🔑';
+secretBtnText.textContent = keys;
+clickCounter.textContent = '';
+this.style.transform = 'scale(0.95)';
+setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
+}
+if (secretClicks >= SECRET_THRESHOLD) {
+this.classList.add('revealed');
+secretBtnText.innerHTML = '<i class="fa-solid fa-print"></i> Print / Save as PDF';
+clickCounter.textContent = '🔓';
+this.style.transform = 'scale(1.05)';
+setTimeout(() => { this.style.transform = 'scale(1)'; }, 200);
+setTimeout(() => { printReport(); }, 400);
+}
 });
 
 // BETTER CORS PROXY - Using a more reliable service
@@ -244,236 +250,236 @@ const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 
 // REAL WEBSITE SCANNER with better CORS handling
 async function scanWebsite(url) {
-  const results = {
-    https: { status: 'fail', evidence: '' },
-    privacyLink: { status: 'fail', evidence: '' },
-    privacyDetails: { status: 'fail', evidence: '' },
-    consent: { status: 'fail', evidence: '' },
-    accessibilityLink: { status: 'fail', evidence: '' },
-    lang: { status: 'fail', evidence: '' },
-    viewport: { status: 'fail', evidence: '' },
-    headings: { status: 'fail', evidence: '' },
-    images: { status: 'fail', evidence: '' },
-    forms: { status: 'fail', evidence: '' },
-    landmarks: { status: 'fail', evidence: '' },
-    skipLink: { status: 'fail', evidence: '' },
-    keyboard: { status: 'manual', evidence: 'Requires manual testing' },
-    screenReader: { status: 'manual', evidence: 'Requires manual testing' },
-    contrast: { status: 'manual', evidence: 'Requires manual testing' }
-  };
+const results = {
+https: { status: 'fail', evidence: '' },
+privacyLink: { status: 'fail', evidence: '' },
+privacyDetails: { status: 'fail', evidence: '' },
+consent: { status: 'fail', evidence: '' },
+accessibilityLink: { status: 'fail', evidence: '' },
+lang: { status: 'fail', evidence: '' },
+viewport: { status: 'fail', evidence: '' },
+headings: { status: 'fail', evidence: '' },
+images: { status: 'fail', evidence: '' },
+forms: { status: 'fail', evidence: '' },
+landmarks: { status: 'fail', evidence: '' },
+skipLink: { status: 'fail', evidence: '' },
+keyboard: { status: 'manual', evidence: 'Requires manual testing' },
+screenReader: { status: 'manual', evidence: 'Requires manual testing' },
+contrast: { status: 'manual', evidence: 'Requires manual testing' }
+};
 
-  try {
-    // Try different CORS proxies
-    let html = null;
-    const proxies = [
-      'https://cors-anywhere.herokuapp.com/',
-      'https://api.allorigins.win/raw?url=',
-      'https://corsproxy.io/?'
-    ];
-    
-    for (const proxy of proxies) {
-      try {
-        const proxyUrl = proxy + encodeURIComponent(url);
-        const response = await fetch(proxyUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        });
-        
-        if (response.ok) {
-          html = await response.text();
-          break;
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-    
-    if (!html) {
-      // Try direct fetch as last resort
-      try {
-        const response = await fetch(url, {
-          mode: 'no-cors',
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        });
-        if (response.ok) {
-          html = await response.text();
-        }
-      } catch (e) {}
-    }
+try {
+// Try different CORS proxies
+let html = null;
+const proxies = [
+'https://cors-anywhere.herokuapp.com/',
+'https://api.allorigins.win/raw?url=',
+'https://corsproxy.io/?'
+];
 
-    if (!html) {
-      Object.keys(results).forEach(key => {
-        if (results[key].status !== 'manual') {
-          results[key].status = 'fail';
-          results[key].evidence = 'Unable to fetch website content. Please try a different URL.';
-        }
-      });
-      return results;
-    }
+for (const proxy of proxies) {
+try {
+const proxyUrl = proxy + encodeURIComponent(url);
+const response = await fetch(proxyUrl, {
+headers: {
+'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+}
+});
 
-    // Check HTTPS
-    if (url.startsWith('https://')) {
-      results.https.status = 'pass';
-      results.https.evidence = 'HTTPS secure connection';
-    } else {
-      results.https.evidence = 'HTTP only - not secure';
-    }
+if (response.ok) {
+html = await response.text();
+break;
+}
+} catch (e) {
+continue;
+}
+}
 
-    // Check for Privacy Policy link
-    const privacyPatterns = /privacy|private|data protection|gdpr|ccpa|california/i;
-    const hasPrivacyLink = privacyPatterns.test(html);
-    if (hasPrivacyLink) {
-      results.privacyLink.status = 'pass';
-      results.privacyLink.evidence = 'Privacy policy link found';
-    } else {
-      results.privacyLink.evidence = 'No privacy policy link detected';
-    }
+if (!html) {
+// Try direct fetch as last resort
+try {
+const response = await fetch(url, {
+mode: 'no-cors',
+headers: {
+'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+}
+});
+if (response.ok) {
+html = await response.text();
+}
+} catch (e) {}
+}
 
-    // Check for Privacy details/disclosures
-    const disclosurePatterns = /personal information|data collection|data sharing|do not sell|opt-out|consumer rights|access request|delete request/i;
-    const hasDisclosures = disclosurePatterns.test(html);
-    if (hasDisclosures) {
-      results.privacyDetails.status = 'pass';
-      results.privacyDetails.evidence = 'Privacy disclosures detected';
-    } else {
-      results.privacyDetails.evidence = 'No privacy disclosures found';
-    }
+if (!html) {
+Object.keys(results).forEach(key => {
+if (results[key].status !== 'manual') {
+results[key].status = 'fail';
+results[key].evidence = 'Unable to fetch website content. Please try a different URL.';
+}
+});
+return results;
+}
 
-    // Check for Cookie/Consent controls
-    const consentPatterns = /cookie|consent|opt-out|cookie notice|cookie banner|accept cookies|reject cookies|tracking/i;
-    const hasConsent = consentPatterns.test(html);
-    if (hasConsent) {
-      results.consent.status = 'pass';
-      results.consent.evidence = 'Consent controls detected';
-    } else {
-      results.consent.evidence = 'No consent controls detected';
-    }
+// Check HTTPS
+if (url.startsWith('https://')) {
+results.https.status = 'pass';
+results.https.evidence = 'HTTPS secure connection';
+} else {
+results.https.evidence = 'HTTP only - not secure';
+}
 
-    // Check for Accessibility link
-    const accessPatterns = /accessibility|wcag|section 508|a11y|accessible/i;
-    const hasAccessibility = accessPatterns.test(html);
-    if (hasAccessibility) {
-      results.accessibilityLink.status = 'pass';
-      results.accessibilityLink.evidence = 'Accessibility resource detected';
-    } else {
-      results.accessibilityLink.evidence = 'No accessibility resource detected';
-    }
+// Check for Privacy Policy link
+const privacyPatterns = /privacy|private|data protection|gdpr|ccpa|california/i;
+const hasPrivacyLink = privacyPatterns.test(html);
+if (hasPrivacyLink) {
+results.privacyLink.status = 'pass';
+results.privacyLink.evidence = 'Privacy policy link found';
+} else {
+results.privacyLink.evidence = 'No privacy policy link detected';
+}
 
-    // Check for Language declaration
-    const langMatch = html.match(/<html[^>]*lang\s*=\s*["']([^"']+)["']/i);
-    if (langMatch) {
-      results.lang.status = 'pass';
-      results.lang.evidence = `Language: ${langMatch[1]}`;
-    } else {
-      results.lang.evidence = 'No language declared';
-    }
+// Check for Privacy details/disclosures
+const disclosurePatterns = /personal information|data collection|data sharing|do not sell|opt-out|consumer rights|access request|delete request/i;
+const hasDisclosures = disclosurePatterns.test(html);
+if (hasDisclosures) {
+results.privacyDetails.status = 'pass';
+results.privacyDetails.evidence = 'Privacy disclosures detected';
+} else {
+results.privacyDetails.evidence = 'No privacy disclosures found';
+}
 
-    // Check for Viewport
-    const viewportMatch = html.match(/<meta[^>]*name\s*=\s*["']viewport["'][^>]*>/i);
-    if (viewportMatch) {
-      results.viewport.status = 'pass';
-      results.viewport.evidence = 'Viewport configured';
-    } else {
-      results.viewport.evidence = 'No viewport meta tag';
-    }
+// Check for Cookie/Consent controls
+const consentPatterns = /cookie|consent|opt-out|cookie notice|cookie banner|accept cookies|reject cookies|tracking/i;
+const hasConsent = consentPatterns.test(html);
+if (hasConsent) {
+results.consent.status = 'pass';
+results.consent.evidence = 'Consent controls detected';
+} else {
+results.consent.evidence = 'No consent controls detected';
+}
 
-    // Check for Headings (H1)
-    const h1Matches = html.match(/<h1[^>]*>/gi);
-    if (h1Matches && h1Matches.length > 0) {
-      results.headings.status = 'pass';
-      results.headings.evidence = `${h1Matches.length} H1 heading(s) found`;
-    } else {
-      results.headings.evidence = 'No H1 headings found';
-    }
+// Check for Accessibility link
+const accessPatterns = /accessibility|wcag|section 508|a11y|accessible/i;
+const hasAccessibility = accessPatterns.test(html);
+if (hasAccessibility) {
+results.accessibilityLink.status = 'pass';
+results.accessibilityLink.evidence = 'Accessibility resource detected';
+} else {
+results.accessibilityLink.evidence = 'No accessibility resource detected';
+}
 
-    // Check for Image alt text
-    const imgMatches = html.match(/<img[^>]*>/gi) || [];
-    const imgWithAlt = html.match(/<img[^>]*alt\s*=\s*["'][^"']*["'][^>]*>/gi) || [];
-    const missingAlt = imgMatches.length - imgWithAlt.length;
-    if (imgMatches.length === 0) {
-      results.images.status = 'warn';
-      results.images.evidence = 'No images found to check';
-    } else if (missingAlt === 0) {
-      results.images.status = 'pass';
-      results.images.evidence = `All ${imgMatches.length} images have alt text`;
-    } else {
-      results.images.status = 'warn';
-      results.images.evidence = `${missingAlt} of ${imgMatches.length} images missing alt text`;
-    }
+// Check for Language declaration
+const langMatch = html.match(/<html[^>]*lang\s*=\s*["']([^"']+)["']/i);
+if (langMatch) {
+results.lang.status = 'pass';
+results.lang.evidence = `Language: ${langMatch[1]}`;
+} else {
+results.lang.evidence = 'No language declared';
+}
 
-    // Check for Forms labels
-    const formMatches = html.match(/<form[^>]*>/gi) || [];
-    const labelMatches = html.match(/<label[^>]*>/gi) || [];
-    if (formMatches.length === 0) {
-      results.forms.status = 'warn';
-      results.forms.evidence = 'No forms found';
-    } else if (labelMatches.length > 0) {
-      results.forms.status = 'pass';
-      results.forms.evidence = `${labelMatches.length} labels found for forms`;
-    } else {
-      results.forms.status = 'warn';
-      results.forms.evidence = 'Forms found but no labels detected';
-    }
+// Check for Viewport
+const viewportMatch = html.match(/<meta[^>]*name\s*=\s*["']viewport["'][^>]*>/i);
+if (viewportMatch) {
+results.viewport.status = 'pass';
+results.viewport.evidence = 'Viewport configured';
+} else {
+results.viewport.evidence = 'No viewport meta tag';
+}
 
-    // Check for Main landmark
-    const mainMatch = html.match(/<main[^>]*>/i) || html.match(/id\s*=\s*["']main["']/i) || html.match(/role\s*=\s*["']main["']/i);
-    if (mainMatch) {
-      results.landmarks.status = 'pass';
-      results.landmarks.evidence = 'Main landmark found';
-    } else {
-      results.landmarks.evidence = 'No main landmark detected';
-    }
+// Check for Headings (H1)
+const h1Matches = html.match(/<h1[^>]*>/gi);
+if (h1Matches && h1Matches.length > 0) {
+results.headings.status = 'pass';
+results.headings.evidence = `${h1Matches.length} H1 heading(s) found`;
+} else {
+results.headings.evidence = 'No H1 headings found';
+}
 
-    // Check for Skip link
-    const skipMatch = html.match(/skip\s*(?:to|nav|content|main)/i);
-    if (skipMatch) {
-      results.skipLink.status = 'pass';
-      results.skipLink.evidence = 'Skip navigation link found';
-    } else {
-      results.skipLink.evidence = 'No skip link detected';
-    }
+// Check for Image alt text
+const imgMatches = html.match(/<img[^>]*>/gi) || [];
+const imgWithAlt = html.match(/<img[^>]*alt\s*=\s*["'][^"']*["'][^>]*>/gi) || [];
+const missingAlt = imgMatches.length - imgWithAlt.length;
+if (imgMatches.length === 0) {
+results.images.status = 'warn';
+results.images.evidence = 'No images found to check';
+} else if (missingAlt === 0) {
+results.images.status = 'pass';
+results.images.evidence = `All ${imgMatches.length} images have alt text`;
+} else {
+results.images.status = 'warn';
+results.images.evidence = `${missingAlt} of ${imgMatches.length} images missing alt text`;
+}
 
-  } catch (error) {
-    console.error('Scan error:', error);
-    Object.keys(results).forEach(key => {
-      if (results[key].status !== 'manual') {
-        results[key].status = 'fail';
-        results[key].evidence = 'Error during scan: ' + error.message;
-      }
-    });
-  }
+// Check for Forms labels
+const formMatches = html.match(/<form[^>]*>/gi) || [];
+const labelMatches = html.match(/<label[^>]*>/gi) || [];
+if (formMatches.length === 0) {
+results.forms.status = 'warn';
+results.forms.evidence = 'No forms found';
+} else if (labelMatches.length > 0) {
+results.forms.status = 'pass';
+results.forms.evidence = `${labelMatches.length} labels found for forms`;
+} else {
+results.forms.status = 'warn';
+results.forms.evidence = 'Forms found but no labels detected';
+}
 
-  return results;
+// Check for Main landmark
+const mainMatch = html.match(/<main[^>]*>/i) || html.match(/id\s*=\s*["']main["']/i) || html.match(/role\s*=\s*["']main["']/i);
+if (mainMatch) {
+results.landmarks.status = 'pass';
+results.landmarks.evidence = 'Main landmark found';
+} else {
+results.landmarks.evidence = 'No main landmark detected';
+}
+
+// Check for Skip link
+const skipMatch = html.match(/skip\s*(?:to|nav|content|main)/i);
+if (skipMatch) {
+results.skipLink.status = 'pass';
+results.skipLink.evidence = 'Skip navigation link found';
+} else {
+results.skipLink.evidence = 'No skip link detected';
+}
+
+} catch (error) {
+console.error('Scan error:', error);
+Object.keys(results).forEach(key => {
+if (results[key].status !== 'manual') {
+results[key].status = 'fail';
+results[key].evidence = 'Error during scan: ' + error.message;
+}
+});
+}
+
+return results;
 }
 
 // Generate score from results
 function calculateScore(results) {
-  let score = 0;
-  let totalScored = 0;
-  
-  Object.values(results).forEach(c => {
-    if (c.status !== 'manual') {
-      totalScored++;
-      if (c.status === 'pass') score += 100;
-      else if (c.status === 'warn') score += 50;
-      else if (c.status === 'fail') score += 0;
-    }
-  });
-  
-  return totalScored > 0 ? Math.round(score / totalScored) : 0;
+let score = 0;
+let totalScored = 0;
+
+Object.values(results).forEach(c => {
+if (c.status !== 'manual') {
+totalScored++;
+if (c.status === 'pass') score += 100;
+else if (c.status === 'warn') score += 50;
+else if (c.status === 'fail') score += 0;
+}
+});
+
+return totalScored > 0 ? Math.round(score / totalScored) : 0;
 }
 
 const copy = {
-  en:{insights:'Digital Insights',subtitle:'Website accessibility · Privacy · Consent',language:'Language',googleTitle:'Google Updates',googleText:'Track confirmed Google search changes and expert analysis.',visitHub:'Visit hub',adaTitle:'ADA Resource',adaText:'Official U.S. Department of Justice web accessibility guidance.',readGuide:'Read the guidance',tagline:'Your Path to a Stronger Online Presence',checkerTitle:'Website Compliance Checker',checkerIntro:'Enter a website address. We inspect available live website evidence; we do not guess from the URL.',websiteLabel:'Website address',analyze:'Analyze',auditNotice:'Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.',report:'Website Screening Report',requestTitle:'Would you like help with the findings?',name:'Full name',phone:'Phone number',email:'Email address',business:'Business name',website:'Website',service:'Service needed',chooseService:'Choose a service',fullAnalysis:'Full Website Analysis',audit:'Compliance Audit',demo:'Complimentary Website Demo',phoneApp:'Custom Phone Application',receptionist:'Virtual Receptionist',social:'Social Media Marketing',advertising:'Online Advertising',other:'Other',message:'How can we help?',consent:'I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.',sendRequest:'Request Help',reportReady:'Your professional report is ready.',printReport:'Print Report',downloadPdf:'Download PDF',stateTitle:'Jurisdiction Information',stateIntro:'Select the state where your business operates to see specific compliance requirements, penalties, and official resources.',viewInfo:'View information',packages:'View Website Packages',privacy:'Privacy Policy',selectPlace:'Choose a state',checking:'Inspecting the live website…',unable:'Unable to verify this website. No score was generated.',score:'Automated evidence score',screened:'Screened',manualReview:'Manual review still required',pass:'Evidence found',warn:'Partial evidence',fail:'Not detected',manual:'Manual test required',formSent:'Thank you. Your request was received.',formError:'The request could not be submitted. Please try again.',selectFirst:'Please select a location.',invalidDomain:'Enter a valid website address (e.g., https://www.business.com)'},
-  es:{insights:'Información Digital',subtitle:'Accesibilidad web · Privacidad · Consentimiento',language:'Idioma',googleTitle:'Actualizaciones de Google',googleText:'Consulta cambios confirmados de Google y análisis de expertos.',visitHub:'Visitar el centro',adaTitle:'Recurso sobre la ADA',adaText:'Guía oficial del Departamento de Justicia de EE. UU. sobre accesibilidad web.',readGuide:'Leer la guía',tagline:'Tu camino hacia una presencia digital más sólida',checkerTitle:'Verificador de Cumplimiento Web',checkerIntro:'Ingresa la dirección de un sitio web. Inspeccionamos evidencia disponible en el sitio; no adivinamos usando la URL.',websiteLabel:'Dirección del sitio web',analyze:'Analizar',auditNotice:'Los resultados automatizados son una evaluación basada en evidencia, no una certificación legal. Aún puede ser necesaria una revisión manual de accesibilidad y una revisión legal.',report:'Informe de Evaluación del Sitio Web',requestTitle:'¿Deseas ayuda con los resultados?',name:'Nombre completo',phone:'Número de teléfono',email:'Correo electrónico',business:'Nombre del negocio',website:'Sitio web',service:'Servicio solicitado',chooseService:'Elige un servicio',fullAnalysis:'Análisis Completo del Sitio Web',audit:'Auditoría de Cumplimiento',demo:'Demostración Gratuita del Sitio Web',phoneApp:'Aplicación Telefónica Personalizada',receptionist:'Recepcionista Virtual',social:'Marketing en Redes Sociales',advertising:'Publicidad en Línea',other:'Otro',message:'¿Cómo podemos ayudarte?',consent:'Acepto que The WebSwan use esta información para responder a mi solicitud. Consulta nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>.',sendRequest:'Solicitar Ayuda',reportReady:'Tu informe profesional está listo.',printReport:'Imprimir Informe',downloadPdf:'Descargar PDF',stateTitle:'Información por Jurisdicción',stateIntro:'Selecciona la ubicación aplicable a tu negocio para consultar recursos oficiales de privacidad y accesibilidad.',viewInfo:'Ver información',packages:'Ver Paquetes de Sitios Web',privacy:'Política de Privacidad',selectPlace:'Elige una ubicación',checking:'Inspeccionando el sitio web en vivo…',unable:'No se pudo verificar este sitio web. No se generó ninguna puntuación.',score:'Puntuación automatizada de evidencia',screened:'Evaluado',manualReview:'Aún se requiere revisión manual',pass:'Evidencia encontrada',warn:'Evidencia parcial',fail:'No detectado',manual:'Prueba manual requerida',formSent:'Gracias. Recibimos tu solicitud.',formError:'No se pudo enviar la solicitud. Inténtalo nuevamente.',selectFirst:'Selecciona una ubicación.',invalidDomain:'Ingresa una dirección de sitio web válida (ej: https://www.negocio.com)'}
+en:{insights:'Digital Insights',subtitle:'Website accessibility · Privacy · Consent',language:'Language',googleTitle:'Google Updates',googleText:'Track confirmed Google search changes and expert analysis.',visitHub:'Visit hub',adaTitle:'ADA Resource',adaText:'Official U.S. Department of Justice web accessibility guidance.',readGuide:'Read the guidance',tagline:'Your Path to a Stronger Online Presence',checkerTitle:'Website Compliance Checker',checkerIntro:'Enter a website address. We inspect available live website evidence; we do not guess from the URL.',websiteLabel:'Website address',analyze:'Analyze',auditNotice:'Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.',report:'Website Screening Report',requestTitle:'Would you like help with the findings?',name:'Full name',phone:'Phone number',email:'Email address',business:'Business name',website:'Website',service:'Service needed',chooseService:'Choose a service',fullAnalysis:'Full Website Analysis',audit:'Compliance Audit',demo:'Complimentary Website Demo',phoneApp:'Custom Phone Application',receptionist:'Virtual Receptionist',social:'Social Media Marketing',advertising:'Online Advertising',other:'Other',message:'How can we help?',consent:'I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.',sendRequest:'Request Help',reportReady:'Your professional report is ready.',printReport:'Print Report',downloadPdf:'Download PDF',stateTitle:'Jurisdiction Information',stateIntro:'Select the state where your business operates to see specific compliance requirements, penalties, and official resources.',viewInfo:'View information',packages:'View Website Packages',privacy:'Privacy Policy',selectPlace:'Choose a state',checking:'Inspecting the live website…',unable:'Unable to verify this website. No score was generated.',score:'Automated evidence score',screened:'Screened',manualReview:'Manual review still required',pass:'Evidence found',warn:'Partial evidence',fail:'Not detected',manual:'Manual test required',formSent:'Thank you. Your request was received.',formError:'The request could not be submitted. Please try again.',selectFirst:'Please select a location.',invalidDomain:'Enter a valid website address (e.g., https://www.business.com)'},
+es:{insights:'Información Digital',subtitle:'Accesibilidad web · Privacidad · Consentimiento',language:'Idioma',googleTitle:'Actualizaciones de Google',googleText:'Consulta cambios confirmados de Google y análisis de expertos.',visitHub:'Visitar el centro',adaTitle:'Recurso sobre la ADA',adaText:'Guía oficial del Departamento de Justicia de EE. UU. sobre accesibilidad web.',readGuide:'Leer la guía',tagline:'Tu camino hacia una presencia digital más sólida',checkerTitle:'Verificador de Cumplimiento Web',checkerIntro:'Ingresa la dirección de un sitio web. Inspeccionamos evidencia disponible en el sitio; no adivinamos usando la URL.',websiteLabel:'Dirección del sitio web',analyze:'Analizar',auditNotice:'Los resultados automatizados son una evaluación basada en evidencia, no una certificación legal. Aún puede ser necesaria una revisión manual de accesibilidad y una revisión legal.',report:'Informe de Evaluación del Sitio Web',requestTitle:'¿Deseas ayuda con los resultados?',name:'Nombre completo',phone:'Número de teléfono',email:'Correo electrónico',business:'Nombre del negocio',website:'Sitio web',service:'Servicio solicitado',chooseService:'Elige un servicio',fullAnalysis:'Análisis Completo del Sitio Web',audit:'Auditoría de Cumplimiento',demo:'Demostración Gratuita del Sitio Web',phoneApp:'Aplicación Telefónica Personalizada',receptionist:'Recepcionista Virtual',social:'Marketing en Redes Sociales',advertising:'Publicidad en Línea',other:'Otro',message:'¿Cómo podemos ayudarte?',consent:'Acepto que The WebSwan use esta información para responder a mi solicitud. Consulta nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>.',sendRequest:'Solicitar Ayuda',reportReady:'Tu informe profesional está listo.',printReport:'Imprimir Informe',downloadPdf:'Descargar PDF',stateTitle:'Información por Jurisdicción',stateIntro:'Selecciona la ubicación aplicable a tu negocio para consultar recursos oficiales de privacidad y accesibilidad.',viewInfo:'Ver información',packages:'Ver Paquetes de Sitios Web',privacy:'Política de Privacidad',selectPlace:'Elige una ubicación',checking:'Inspeccionando el sitio web en vivo…',unable:'No se pudo verificar este sitio web. No se generó ninguna puntuación.',score:'Puntuación automatizada de evidencia',screened:'Evaluado',manualReview:'Aún se requiere revisión manual',pass:'Evidencia encontrada',warn:'Evidencia parcial',fail:'No detectado',manual:'Prueba manual requerida',formSent:'Gracias. Recibimos tu solicitud.',formError:'No se pudo enviar la solicitud. Inténtalo nuevamente.',selectFirst:'Selecciona una ubicación.',invalidDomain:'Ingresa una dirección de sitio web válida (ej: https://www.negocio.com)'}
 };
 
 const checkText={
-  en:{https:'Secure HTTPS connection',privacyLink:'Privacy policy or privacy notice',privacyDetails:'Data-use and rights disclosures',consent:'Cookie or consent controls',accessibilityLink:'Accessibility information or statement',lang:'Page language declared',viewport:'Mobile viewport configured',headings:'Page heading structure',images:'Image alternative text',forms:'Form labels',landmarks:'Main content landmark',skipLink:'Skip-navigation link',keyboard:'Keyboard navigation, focus order and visible focus',screenReader:'Screen-reader behavior',contrast:'Color contrast, zoom and reflow'},
-  es:{https:'Conexión HTTPS segura',privacyLink:'Política o aviso de privacidad',privacyDetails:'Divulgaciones sobre uso de datos y derechos',consent:'Controles de cookies o consentimiento',accessibilityLink:'Información o declaración de accesibilidad',lang:'Idioma de la página declarado',viewport:'Configuración móvil viewport',headings:'Estructura de encabezados',images:'Texto alternativo de imágenes',forms:'Etiquetas de formularios',landmarks:'Región principal del contenido',skipLink:'Enlace para saltar la navegación',keyboard:'Navegación por teclado, orden y foco visible',screenReader:'Funcionamiento con lector de pantalla',contrast:'Contraste de color, zoom y reajuste de contenido'}
+en:{https:'Secure HTTPS connection',privacyLink:'Privacy policy or privacy notice',privacyDetails:'Data-use and rights disclosures',consent:'Cookie or consent controls',accessibilityLink:'Accessibility information or statement',lang:'Page language declared',viewport:'Mobile viewport configured',headings:'Page heading structure',images:'Image alternative text',forms:'Form labels',landmarks:'Main content landmark',skipLink:'Skip-navigation link',keyboard:'Keyboard navigation, focus order and visible focus',screenReader:'Screen-reader behavior',contrast:'Color contrast, zoom and reflow'},
+es:{https:'Conexión HTTPS segura',privacyLink:'Política o aviso de privacidad',privacyDetails:'Divulgaciones sobre uso de datos y derechos',consent:'Controles de cookies o consentimiento',accessibilityLink:'Información o declaración de accesibilidad',lang:'Idioma de la página declarado',viewport:'Configuración móvil viewport',headings:'Estructura de encabezados',images:'Texto alternativo de imágenes',forms:'Etiquetas de formularios',landmarks:'Región principal del contenido',skipLink:'Enlace para saltar la navegación',keyboard:'Navegación por teclado, orden y foco visible',screenReader:'Funcionamiento con lector de pantalla',contrast:'Contraste de color, zoom y reajuste de contenido'}
 };
 
 const places = ['California','New York','Texas','Georgia','Florida','Utah','Arizona','Illinois','North Carolina','Nevada'];
@@ -482,44 +488,44 @@ let lang='en';
 const t=k=>copy[lang][k]||k;
 
 function applyLanguage(){
-  document.documentElement.lang=lang;
-  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>el.placeholder=t(el.dataset.i18nPlaceholder));
-  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
-  buildPlaces();
-  if(window.lastAudit)renderAudit(window.lastAudit);
-  if(window.lastRequest)buildProfessionalReport(window.lastRequest)
+document.documentElement.lang=lang;
+document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>el.placeholder=t(el.dataset.i18nPlaceholder));
+document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+buildPlaces();
+if(window.lastAudit)renderAudit(window.lastAudit);
+if(window.lastRequest)buildProfessionalReport(window.lastRequest)
 }
 
 function buildPlaces(){
-  const s=document.getElementById('jurisdiction');
-  const selected=s.value;
-  s.innerHTML=`<option value="">${t('selectPlace')}</option>` + 
-    places.map(p => `<option value="${p}">${p}</option>`).join('');
-  s.value=selected;
+const s=document.getElementById('jurisdiction');
+const selected=s.value;
+s.innerHTML=`<option value="">${t('selectPlace')}</option>` +
+places.map(p => `<option value="${p}">${p}</option>`).join('');
+s.value=selected;
 }
 
 function normalizeDomain(raw){
-  let v=String(raw||'').trim().replace(/\s+/g,'');
-  if(!v)return null;
-  if(!/^https?:\/\//i.test(v)) v='https://'+v;
-  try {
-    const u=new URL(v);
-    if(!u.hostname.includes('.')||!/^[a-z0-9.-]+$/i.test(u.hostname)) return null;
-    u.protocol='https:';
-    u.username='';
-    u.password='';
-    u.search='';
-    u.hash='';
-    return u.href;
-  } catch(err){ return null }
+let v=String(raw||'').trim().replace(/\s+/g,'');
+if(!v)return null;
+if(!/^https?:\/\//i.test(v)) v='https://'+v;
+try {
+const u=new URL(v);
+if(!u.hostname.includes('.')||!/^[a-z0-9.-]+$/i.test(u.hostname)) return null;
+u.protocol='https:';
+u.username='';
+u.password='';
+u.search='';
+u.hash='';
+return u.href;
+} catch(err){ return null }
 }
 
 const urlInput=document.getElementById('urlInput');
 urlInput.addEventListener('input',function(e){ this.value = this.value.replace(/\s+/g, ''); });
 urlInput.addEventListener('paste',function(e){
-  let p=(e.clipboardData||window.clipboardData).getData('text').trim().replace(/\s+/g,'');
-  if(p){ e.preventDefault(); this.value=p; }
+let p=(e.clipboardData||window.clipboardData).getData('text').trim().replace(/\s+/g,'');
+if(p){ e.preventDefault(); this.value=p; }
 });
 urlInput.addEventListener('focus',function(){ if(this.value !== '') this.select(); });
 
@@ -527,152 +533,160 @@ document.getElementById('analyzeBtn').addEventListener('click',runAudit);
 urlInput.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); runAudit(); } });
 
 async function runAudit(){
-  const raw=document.getElementById('urlInput').value.trim();
-  if(!raw){ alert(t('invalidDomain')); urlInput.focus(); return; }
-  const url=normalizeDomain(raw);
-  if(!url){ alert(t('invalidDomain')); urlInput.focus(); return; }
-  
-  const btn=document.getElementById('analyzeBtn'); 
-  const result=document.getElementById('result');
-  btn.disabled=true;
-  result.classList.add('show');
-  document.getElementById('summary').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${t('checking')}`;
-  document.getElementById('checks').innerHTML='';
-  document.getElementById('requestSection').classList.remove('show');
-  document.getElementById('reportActionsTop').classList.remove('show');
-  secretClicks = 0;
-  secretBtn.classList.remove('revealed');
-  secretBtnText.textContent = '•••••••';
-  clickCounter.textContent = '';
-  
-  try{
-    const scanResults = await scanWebsite(url);
-    const hostname = new URL(url).hostname;
-    const checks = Object.entries(scanResults).map(([id, data]) => ({
-      id: id,
-      status: data.status,
-      evidenceKey: data.status === 'pass' ? 'found' : data.status === 'warn' ? 'partial' : 'missing',
-      evidenceValues: { details: data.evidence }
-    }));
-    const score = calculateScore(scanResults);
-    const data = { ok: true, score: score, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks };
-    window.lastAudit = data;
-    renderAudit(data);
-    document.getElementById('requestWebsite').value = data.finalUrl || url;
-    document.getElementById('requestWebsiteHidden').value = data.finalUrl || url;
-    document.getElementById('requestSection').classList.add('show');
-    document.getElementById('reportActionsTop').classList.add('show');
-  }catch(e){
-    console.error('Audit error:', e);
-    document.getElementById('summary').innerHTML=`<strong>${t('unable')}</strong><br><span class="evidence">${escapeHtml(e.message)}</span>`;
-  }finally{ btn.disabled=false; }
+const raw=document.getElementById('urlInput').value.trim();
+if(!raw){ alert(t('invalidDomain')); urlInput.focus(); return; }
+const url=normalizeDomain(raw);
+if(!url){ alert(t('invalidDomain')); urlInput.focus(); return; }
+
+const btn=document.getElementById('analyzeBtn');
+const result=document.getElementById('result');
+btn.disabled=true;
+result.classList.add('show');
+document.getElementById('summary').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${t('checking')}`;
+document.getElementById('checks').innerHTML='';
+document.getElementById('requestSection').classList.remove('show');
+document.getElementById('reportActionsTop').classList.remove('show');
+document.getElementById('pdfReport').innerHTML='';
+window.lastAudit=null;
+secretClicks = 0;
+secretBtn.classList.remove('revealed');
+secretBtnText.textContent = '🔑🔑🔑';
+clickCounter.textContent = '';
+
+try{
+const scanResults = await scanWebsite(url);
+const hostname = new URL(url).hostname;
+const checks = Object.entries(scanResults).map(([id, data]) => ({
+id: id,
+status: data.status,
+evidenceKey: data.status === 'pass' ? 'found' : data.status === 'warn' ? 'partial' : 'missing',
+evidenceValues: { details: data.evidence }
+}));
+const score = calculateScore(scanResults);
+const data = { ok: true, score: score, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks };
+window.lastAudit = data;
+renderAudit(data);
+buildProfessionalReport(window.lastRequest || {});
+document.getElementById('requestWebsite').value = data.finalUrl || url;
+document.getElementById('requestWebsiteHidden').value = data.finalUrl || url;
+document.getElementById('requestSection').classList.add('show');
+document.getElementById('reportActionsTop').classList.add('show');
+}catch(e){
+console.error('Audit error:', e);
+document.getElementById('summary').innerHTML=`<strong>${t('unable')}</strong><br><span class="evidence">${escapeHtml(e.message)}</span>`;
+}finally{ btn.disabled=false; }
 }
 
 function renderEvidence(c){ return c.evidenceValues?.details || ''; }
 
 function renderAudit(data){
-  document.getElementById('resultTitle').textContent=(data.hostname||'')+' · '+t('report');
-  document.getElementById('summary').innerHTML=`<div class="score"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div><span class="evidence">${t('manualReview')}</span>`;
-  document.getElementById('checks').innerHTML=data.checks.map(c=>{
-    const status=c.status||'manual';
-    const icon=status==='pass'?'fa-circle-check':status==='fail'?'fa-circle-xmark':status==='warn'?'fa-triangle-exclamation':'fa-hand';
-    return `<div class="check ${status}"><i class="fa-solid ${icon}"></i><strong>${escapeHtml(checkText[lang][c.id]||c.id)}</strong><span class="evidence">${t(status)}${renderEvidence(c)?' · '+escapeHtml(renderEvidence(c)):''}</span></div>`
-  }).join('');
+document.getElementById('resultTitle').textContent=(data.hostname||'')+' · '+t('report');
+document.getElementById('summary').innerHTML=`<div class="score"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div><span class="evidence">${t('manualReview')}</span>`;
+document.getElementById('checks').innerHTML=data.checks.map(c=>{
+const status=c.status||'manual';
+const icon=status==='pass'?'fa-circle-check':status==='fail'?'fa-circle-xmark':status==='warn'?'fa-triangle-exclamation':'fa-hand';
+return `<div class="check ${status}"><i class="fa-solid ${icon}"></i><strong>${escapeHtml(checkText[lang][c.id]||c.id)}</strong><span class="evidence">${t(status)}${renderEvidence(c)?' · '+escapeHtml(renderEvidence(c)):''}</span></div>`
+}).join('');
 }
 
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]))}
 
 function reportCss(){
-  return `*{box-sizing:border-box}body{margin:0;background:#eef3f7;color:#12263a;font-family:Arial,sans-serif}.export-report{width:760px;margin:24px auto;background:#fff;padding:40px;line-height:1.45}.export-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding-bottom:18px;border-bottom:4px solid #1e6f9f}.export-brand{font-size:26px;font-weight:800;color:#0a1e2f}.export-brand span{color:#1e6f9f}.export-kicker{color:#547087;font-size:12px;text-transform:uppercase;letter-spacing:1.2px}.export-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.export-meta div,.export-request div{border:1px solid #d8e6f0;border-radius:8px;padding:10px}.export-label{display:block;color:#667d8f;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}.export-score{margin:18px 0;background:linear-gradient(100deg,#0a1e2f,#1e6f9f);color:#fff;border-radius:12px;padding:18px;display:flex;justify-content:space-between;align-items:center}.export-score strong{font-size:32px}.export-section{margin-top:20px}.export-section h2{font-size:16px;color:#0a1e2f;border-bottom:2px solid #c7e1f1;padding-bottom:6px;margin-bottom:10px}.export-check{break-inside:avoid;border:1px solid #d8e6f0;border-left:5px solid #1e6f9f;border-radius:8px;padding:10px;margin-bottom:7px;font-size:11px}.export-check.pass{border-left-color:#17864a}.export-check.warn{border-left-color:#c46a00}.export-check.fail{border-left-color:#b52d21}.export-check.manual{border-left-color:#1e6f9f}.export-check small{display:block;color:#63798b;margin-top:3px}.export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}.export-request .wide{grid-column:1/-1}.export-disclaimer{margin-top:20px;background:#f5f9fc;border-radius:8px;padding:12px;color:#4f687c;font-size:10px}.export-footer{margin-top:18px;padding-top:10px;border-top:1px solid #cbdce8;display:flex;justify-content:space-between;color:#4f687c;font-size:10px}@media print{body{background:#fff}.export-report{margin:0;width:auto;padding:.35in}@page{size:letter;margin:.35in}}`;
+return `*{box-sizing:border-box}body{margin:0;background:#eef3f7;color:#12263a;font-family:Arial,sans-serif}.export-report{width:760px;margin:24px auto;background:#fff;padding:40px;line-height:1.45}.export-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding-bottom:18px;border-bottom:4px solid #1e6f9f}.export-brand{font-size:26px;font-weight:800;color:#0a1e2f}.export-brand span{color:#1e6f9f}.export-kicker{color:#547087;font-size:12px;text-transform:uppercase;letter-spacing:1.2px}.export-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.export-meta div,.export-request div{border:1px solid #d8e6f0;border-radius:8px;padding:10px}.export-label{display:block;color:#667d8f;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}.export-score{margin:18px 0;background:linear-gradient(100deg,#0a1e2f,#1e6f9f);color:#fff;border-radius:12px;padding:18px;display:flex;justify-content:space-between;align-items:center}.export-score strong{font-size:32px}.export-section{margin-top:20px}.export-section h2{font-size:16px;color:#0a1e2f;border-bottom:2px solid #c7e1f1;padding-bottom:6px;margin-bottom:10px}.export-check{break-inside:avoid;border:1px solid #d8e6f0;border-left:5px solid #1e6f9f;border-radius:8px;padding:10px;margin-bottom:7px;font-size:11px}.export-check.pass{border-left-color:#17864a}.export-check.warn{border-left-color:#c46a00}.export-check.fail{border-left-color:#b52d21}.export-check.manual{border-left-color:#1e6f9f}.export-check small{display:block;color:#63798b;margin-top:3px}.export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}.export-request .wide{grid-column:1/-1}.export-disclaimer{margin-top:20px;background:#f5f9fc;border-radius:8px;padding:12px;color:#4f687c;font-size:10px}.export-footer{margin-top:18px;padding-top:10px;border-top:1px solid #cbdce8;display:flex;justify-content:space-between;color:#4f687c;font-size:10px}@media print{body{background:#fff}.export-report{margin:0;width:auto;padding:.35in}@page{size:letter;margin:.35in}}`;
 }
 
 function buildProfessionalReport(requestData){
-  const data=window.lastAudit; if(!data)return;
-  const labels=checkText[lang];
-  const checkedAt=new Date(data.checkedAt||Date.now()).toLocaleString(lang==='es'?'es-US':'en-US');
-  const details=[['name',t('name')],['business',t('business')],['email',t('email')],['phone',t('phone')],['service',t('service')],['message',t('message')]]
-    .map(([key,label])=>requestData[key]?`<div class="${key==='message'?'wide':''}"><span class="export-label">${escapeHtml(label)}</span>${escapeHtml(requestData[key])}</div>`:'').join('');
-  const findings=(data.checks||[]).map(c=>`<div class="export-check ${escapeHtml(c.status||'manual')}"><strong>${escapeHtml(labels[c.id]||c.id)}</strong><small>${escapeHtml(t(c.status||'manual'))}${renderEvidence(c)?' - '+escapeHtml(renderEvidence(c)):''}</small></div>`).join('');
-  const report=document.getElementById('pdfReport');
-  report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section><section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section><section class="export-section"><h2>${lang==='es'?'Detalles de la solicitud':'Request details'}</h2><div class="export-request">${details}</div></section><div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
-  report.dataset.filename=`webswan-compliance-report-${String(data.hostname||'website').replace(/[^a-z0-9.-]+/gi,'-')}.pdf`;
+requestData = requestData || {};
+const data=window.lastAudit; if(!data)return;
+const labels=checkText[lang];
+const checkedAt=new Date(data.checkedAt||Date.now()).toLocaleString(lang==='es'?'es-US':'en-US');
+const details=[['name',t('name')],['business',t('business')],['email',t('email')],['phone',t('phone')],['service',t('service')],['message',t('message')]]
+.map(([key,label])=>requestData[key]?`<div class="${key==='message'?'wide':''}"><span class="export-label">${escapeHtml(label)}</span>${escapeHtml(requestData[key])}</div>`:'').join('');
+const detailsHtml = details.trim() ? details : `<div class="wide"><span class="export-label">${lang==='es'?'Nota':'Note'}</span>${lang==='es'?'Aún no se han enviado detalles de contacto.':'No contact details submitted yet.'}</div>`;
+const findings=(data.checks||[]).map(c=>`<div class="export-check ${escapeHtml(c.status||'manual')}"><strong>${escapeHtml(labels[c.id]||c.id)}</strong><small>${escapeHtml(t(c.status||'manual'))}${renderEvidence(c)?' - '+escapeHtml(renderEvidence(c)):''}</small></div>`).join('');
+const report=document.getElementById('pdfReport');
+report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section><section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section><section class="export-section"><h2>${lang==='es'?'Detalles de la solicitud':'Request details'}</h2><div class="export-request">${detailsHtml}</div></section><div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
+report.dataset.filename=`webswan-compliance-report-${String(data.hostname||'website').replace(/[^a-z0-9.-]+/gi,'-')}.pdf`;
 }
 
 function printReport() {
-  const report=document.getElementById('pdfReport');
-  if(!report.innerHTML){
-    alert('Please run a compliance check first.');
-    return;
-  }
-  const win=window.open('','_blank','width=900,height=900');
-  if(!win){alert('Please allow pop-ups to print the report.');return}
-  win.document.open();
-  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>WebSwan Compliance Report</title><style>${reportCss()}</style></head><body><article class="export-report">${report.innerHTML}</article></body></html>`);
-  win.document.close();
-  setTimeout(()=>{win.focus();win.print()},400);
+const report=document.getElementById('pdfReport');
+if((!report.innerHTML || !report.innerHTML.trim()) && window.lastAudit){
+buildProfessionalReport(window.lastRequest||{});
+}
+if(!report.innerHTML || !report.innerHTML.trim()){
+alert('Please run a compliance check first.');
+return;
+}
+const win=window.open('','_blank','width=900,height=900');
+if(!win){alert('Please allow pop-ups to print the report.');return}
+win.document.open();
+win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>WebSwan Compliance Report</title><style>${reportCss()}</style></head><body><article class="export-report">${report.innerHTML}</article></body></html>`);
+win.document.close();
+setTimeout(()=>{win.focus();win.print()},400);
 }
 
 document.getElementById('language').addEventListener('change',e=>{lang=e.target.value;applyLanguage()});
 
 document.getElementById('stateBtn').addEventListener('click',()=>{
-  const p=document.getElementById('jurisdiction').value;
-  const box=document.getElementById('stateResult');
-  if(!p){alert(t('selectFirst'));return}
-  
-  const stateData = {
-    "California": { summary: "California has the strictest privacy laws in the US with the CCPA/CPRA.", requirements: ["Post a clear privacy policy", "Provide a 'Do Not Sell' link", "Implement cookie consent banner"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $2,663 per unintentional violation" }, links: [{ text: "CA DOJ - CCPA", url: "https://oag.ca.gov/privacy/ccpa" }] },
-    "New York": { summary: "New York has strict privacy laws including the SHIELD Act.", requirements: ["Maintain a comprehensive privacy policy", "Implement reasonable data security measures", "Provide breach notification within 72 hours"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NY AG - Data Breach", url: "https://ag.ny.gov/resources/organizations/data-breach-reporting" }] },
-    "Texas": { summary: "Texas has the Texas Data Privacy and Security Act (TDPSA).", requirements: ["Post a privacy notice", "Provide opt-out mechanisms", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "TX AG - Consumer Privacy", url: "https://www.texasattorneygeneral.gov/consumer-protection" }] },
-    "Georgia": { summary: "Georgia has data breach notification laws and privacy requirements.", requirements: ["Post a privacy policy", "Data breach notification", "Implement reasonable data security measures"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $2,000 per violation" }, links: [{ text: "GA AG - Consumer Protection", url: "https://law.georgia.gov/consumer-protection" }] },
-    "Florida": { summary: "Florida has the Florida Digital Bill of Rights.", requirements: ["Publish a clear privacy policy", "Disclose data collection practices", "Provide consumer rights to opt-out"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "FL AG - Consumer Protection", url: "https://www.myfloridalegal.com/consumer-protection" }] },
-    "Utah": { summary: "Utah has the Utah Consumer Privacy Act (UCPA).", requirements: ["Post a privacy notice", "Consumer rights: access, correction, deletion", "Opt-out for targeted advertising"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "UT AG - Consumer Protection", url: "https://attorneygeneral.utah.gov/consumer-protection/" }] },
-    "Arizona": { summary: "Arizona has data breach notification laws and privacy requirements.", requirements: ["Post a privacy policy", "Data breach notification within 45 days", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $10,000 per violation" }, links: [{ text: "AZ AG - Consumer Protection", url: "https://www.azag.gov/consumer" }] },
-    "Illinois": { summary: "Illinois has the Biometric Information Privacy Act (BIPA).", requirements: ["Clear privacy policy with biometric disclosure", "Written consent for biometric collection", "Data retention policies"], penalties: { ada: "Up to $115,231 for first violation", privacy: "$1,000 per negligent violation" }, links: [{ text: "IL AG - Privacy", url: "https://illinoisattorneygeneral.gov/consumers/identitytheft/" }] },
-    "North Carolina": { summary: "North Carolina has the NC Identity Theft Protection Act.", requirements: ["Post a privacy policy", "Data breach notification", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NC AG - Consumer Protection", url: "https://ncdoj.gov/consumer/" }] },
-    "Nevada": { summary: "Nevada has the Nevada Privacy Law (NRS 603A).", requirements: ["Post a privacy policy", "Provide opt-out for data sales", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NV AG - Privacy", url: "https://ag.nv.gov/Privacy/" }] }
-  };
+const p=document.getElementById('jurisdiction').value;
+const box=document.getElementById('stateResult');
+if(!p){alert(t('selectFirst'));return}
 
-  const data = stateData[p] || stateData["California"];
-  box.classList.add('show');
-  let html = `<h3><i class="fa-solid fa-info-circle"></i> ${p} Compliance Requirements</h3>`;
-  html += `<p><strong>Summary:</strong> ${data.summary}</p>`;
-  html += `<div class="requirement"><strong><i class="fa-solid fa-list-check"></i> Website Requirements:</strong><ul style="margin:6px 0 0 20px">`;
-  data.requirements.forEach(req => { html += `<li>${req}</li>`; });
-  html += `</ul></div>`;
-  html += `<div class="penalty"><strong><i class="fa-solid fa-gavel"></i> Penalties:</strong><br>`;
-  html += `<strong>ADA Violations:</strong> ${data.penalties.ada}<br>`;
-  html += `<strong>Privacy Violations:</strong> ${data.penalties.privacy}`;
-  html += `</div>`;
-  html += `<div class="link-list"><strong><i class="fa-solid fa-link"></i> Official Resources:</strong>`;
-  data.links.forEach(link => {
-    html += `<a href="${link.url}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${link.text}</a>`;
-  });
-  html += `</div>`;
-  box.innerHTML = html;
+const stateData = {
+"California": { summary: "California has the strictest privacy laws in the US with the CCPA/CPRA.", requirements: ["Post a clear privacy policy", "Provide a 'Do Not Sell' link", "Implement cookie consent banner"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $2,663 per unintentional violation" }, links: [{ text: "CA DOJ - CCPA", url: "https://oag.ca.gov/privacy/ccpa" }] },
+"New York": { summary: "New York has strict privacy laws including the SHIELD Act.", requirements: ["Maintain a comprehensive privacy policy", "Implement reasonable data security measures", "Provide breach notification within 72 hours"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NY AG - Data Breach", url: "https://ag.ny.gov/resources/organizations/data-breach-reporting" }] },
+"Texas": { summary: "Texas has the Texas Data Privacy and Security Act (TDPSA).", requirements: ["Post a privacy notice", "Provide opt-out mechanisms", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "TX AG - Consumer Privacy", url: "https://www.texasattorneygeneral.gov/consumer-protection" }] },
+"Georgia": { summary: "Georgia has data breach notification laws and privacy requirements.", requirements: ["Post a privacy policy", "Data breach notification", "Implement reasonable data security measures"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $2,000 per violation" }, links: [{ text: "GA AG - Consumer Protection", url: "https://law.georgia.gov/consumer-protection" }] },
+"Florida": { summary: "Florida has the Florida Digital Bill of Rights.", requirements: ["Publish a clear privacy policy", "Disclose data collection practices", "Provide consumer rights to opt-out"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "FL AG - Consumer Protection", url: "https://www.myfloridalegal.com/consumer-protection" }] },
+"Utah": { summary: "Utah has the Utah Consumer Privacy Act (UCPA).", requirements: ["Post a privacy notice", "Consumer rights: access, correction, deletion", "Opt-out for targeted advertising"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "UT AG - Consumer Protection", url: "https://attorneygeneral.utah.gov/consumer-protection/" }] },
+"Arizona": { summary: "Arizona has data breach notification laws and privacy requirements.", requirements: ["Post a privacy policy", "Data breach notification within 45 days", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $10,000 per violation" }, links: [{ text: "AZ AG - Consumer Protection", url: "https://www.azag.gov/consumer" }] },
+"Illinois": { summary: "Illinois has the Biometric Information Privacy Act (BIPA).", requirements: ["Clear privacy policy with biometric disclosure", "Written consent for biometric collection", "Data retention policies"], penalties: { ada: "Up to $115,231 for first violation", privacy: "$1,000 per negligent violation" }, links: [{ text: "IL AG - Privacy", url: "https://illinoisattorneygeneral.gov/consumers/identitytheft/" }] },
+"North Carolina": { summary: "North Carolina has the NC Identity Theft Protection Act.", requirements: ["Post a privacy policy", "Data breach notification", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NC AG - Consumer Protection", url: "https://ncdoj.gov/consumer/" }] },
+"Nevada": { summary: "Nevada has the Nevada Privacy Law (NRS 603A).", requirements: ["Post a privacy policy", "Provide opt-out for data sales", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NV AG - Privacy", url: "https://ag.nv.gov/Privacy/" }] }
+};
+
+const data = stateData[p] || stateData["California"];
+box.classList.add('show');
+let html = `<h3><i class="fa-solid fa-info-circle"></i> ${p} Compliance Requirements</h3>`;
+html += `<p><strong>Summary:</strong> ${data.summary}</p>`;
+html += `<div class="requirement"><strong><i class="fa-solid fa-list-check"></i> Website Requirements:</strong><ul style="margin:6px 0 0 20px">`;
+data.requirements.forEach(req => { html += `<li>${req}</li>`; });
+html += `</ul></div>`;
+html += `<div class="penalty"><strong><i class="fa-solid fa-gavel"></i> Penalties:</strong><br>`;
+html += `<strong>ADA Violations:</strong> ${data.penalties.ada}<br>`;
+html += `<strong>Privacy Violations:</strong> ${data.penalties.privacy}`;
+html += `</div>`;
+html += `<div class="link-list"><strong><i class="fa-solid fa-link"></i> Official Resources:</strong>`;
+data.links.forEach(link => {
+html += `<a href="${link.url}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${link.text}</a>`;
+});
+html += `</div>`;
+box.innerHTML = html;
 });
 
 document.getElementById('requestForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const form=e.currentTarget,msg=document.getElementById('formMessage');
-  const submitted=Object.fromEntries(new FormData(form).entries());
-  try{
-    const body=new URLSearchParams(new FormData(form));
-    const r=await fetch('/',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:body.toString()});
-    if(!r.ok)throw new Error();
-    msg.textContent=t('formSent');
-    msg.style.color='#17864a';
-    window.lastRequest=submitted;
-    buildProfessionalReport(submitted);
-    form.reset();
-    if(window.lastAudit){
-      const url=window.lastAudit.finalUrl||'';
-      document.getElementById('requestWebsite').value=url;
-      document.getElementById('requestWebsiteHidden').value=url;
-    }
-  }catch(err){
-    msg.textContent=t('formError');
-    msg.style.color='#b52d21';
-  }
+e.preventDefault();
+const form=e.currentTarget,msg=document.getElementById('formMessage');
+const submitted=Object.fromEntries(new FormData(form).entries());
+try{
+const body=new URLSearchParams(new FormData(form));
+const r=await fetch('/',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:body.toString()});
+if(!r.ok)throw new Error();
+msg.textContent=t('formSent');
+msg.style.color='#17864a';
+window.lastRequest=submitted;
+buildProfessionalReport(submitted);
+form.reset();
+if(window.lastAudit){
+const url=window.lastAudit.finalUrl||'';
+document.getElementById('requestWebsite').value=url;
+document.getElementById('requestWebsiteHidden').value=url;
+}
+}catch(err){
+msg.textContent=t('formError');
+msg.style.color='#b52d21';
+}
 });
 
 applyLanguage();
