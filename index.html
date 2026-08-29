@@ -61,6 +61,12 @@
     .secret-print-btn{display:none;border:2px solid #1e6f9f;border-radius:999px;padding:10px 20px;background:#fff;color:#0a1e2f;font-weight:800;cursor:pointer;align-items:center;gap:8px}
     .secret-print-btn.revealed{display:inline-flex}
     .secret-print-btn:hover{background:#0a1e2f;color:#fff}
+    .secret-modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,30,47,0.55);z-index:999;align-items:center;justify-content:center}
+    .secret-modal-overlay.show{display:flex}
+    .secret-modal-box{background:#fff;border-radius:20px;padding:34px 40px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.35);cursor:pointer;user-select:none;max-width:280px}
+    .secret-modal-box #secretModalIcon{font-size:2.6rem;margin-bottom:10px;transition:transform 0.15s}
+    .secret-modal-box.pulse #secretModalIcon{transform:scale(1.25)}
+    .secret-modal-box p#secretModalText{color:#1f3c54;font-weight:700;font-size:.9rem}
     .request{display:none;margin-top:18px;border-top:2px dashed #d0dcec;padding-top:16px}
     .request.show{display:block}
     .request h3{font-size:1rem;margin-bottom:10px}
@@ -170,6 +176,12 @@
         </div>
       </div>
     </div>
+    <div id="secretModal" class="secret-modal-overlay" aria-hidden="true">
+      <div class="secret-modal-box">
+        <p id="secretModalIcon">🔐</p>
+        <p id="secretModalText">Almost there...</p>
+      </div>
+    </div>
     <section id="requestSection" class="request">
       <h3 data-i18n="requestTitle">Would you like help with the findings?</h3>
       <form id="requestForm" name="compliance-help" method="POST" data-netlify="true" netlify-honeypot="bot-field">
@@ -206,11 +218,18 @@
   <footer class="footer"><span>© 2026 The WebSwan</span><a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener" data-i18n="privacy">Privacy Policy</a></footer>
 </main>
 <script>
-// SECRET BUTTON - 3 clicks on the text to reveal print button
-let secretClicks = 0;
-const SECRET_THRESHOLD = 3;
+// SECRET BUTTON - stage 1: 7 clicks on the key emoji opens a modal;
+// stage 2: 3 more clicks inside that modal reveals the print button.
+let secretClicksStage1 = 0;
+let secretClicksStage2 = 0;
+const SECRET_THRESHOLD_1 = 7;
+const SECRET_THRESHOLD_2 = 3;
 const secretTrigger = document.getElementById('secretTrigger');
 const secretPrintBtn = document.getElementById('secretPrintBtn');
+const secretModal = document.getElementById('secretModal');
+const secretModalBox = secretModal.querySelector('.secret-modal-box');
+const secretModalIcon = document.getElementById('secretModalIcon');
+const secretModalText = document.getElementById('secretModalText');
 secretTrigger.addEventListener('click', function(e) {
   e.stopPropagation();
 
@@ -218,22 +237,41 @@ secretTrigger.addEventListener('click', function(e) {
     return;
   }
 
-  secretClicks++;
-  const remaining = SECRET_THRESHOLD - secretClicks;
+  secretClicksStage1++;
+  const remaining = SECRET_THRESHOLD_1 - secretClicksStage1;
 
   this.classList.add('secret-clicked');
   setTimeout(() => { this.classList.remove('secret-clicked'); }, 500);
 
-  if (secretClicks >= SECRET_THRESHOLD) {
-    secretPrintBtn.classList.add('revealed');
-    this.innerHTML = 'Your professional report is ready. <span style="color:#17864a;">🔓</span>';
-    setTimeout(() => {
-      printReport();
-    }, 400);
+  if (secretClicksStage1 >= SECRET_THRESHOLD_1) {
+    // Stage 1 complete - open the second modal for stage 2.
+    secretClicksStage2 = 0;
+    secretModalIcon.textContent = '🔐';
+    secretModalText.textContent = `Keep going... ${SECRET_THRESHOLD_2} more`;
+    secretModal.classList.add('show');
   } else {
     let dots = '';
     for (let i = 0; i < remaining; i++) dots += '•';
     this.innerHTML = `Your professional report is ready. <span style="font-size:0.7rem;opacity:0.5;">${dots}</span>`;
+  }
+});
+secretModalBox.addEventListener('click', function(e) {
+  e.stopPropagation();
+  secretClicksStage2++;
+  const remaining = SECRET_THRESHOLD_2 - secretClicksStage2;
+
+  this.classList.add('pulse');
+  setTimeout(() => { this.classList.remove('pulse'); }, 150);
+
+  if (secretClicksStage2 >= SECRET_THRESHOLD_2) {
+    secretModal.classList.remove('show');
+    secretPrintBtn.classList.add('revealed');
+    secretTrigger.innerHTML = 'Your professional report is ready. <span style="color:#17864a;">🔓</span>';
+    setTimeout(() => {
+      printReport();
+    }, 400);
+  } else {
+    secretModalText.textContent = remaining > 0 ? `Keep going... ${remaining} more` : 'Unlocking...';
   }
 });
 secretPrintBtn.addEventListener('click', function(e) {
@@ -242,27 +280,54 @@ secretPrintBtn.addEventListener('click', function(e) {
 });
 // ========== CORS PROXIES (with fallback chain) ==========
 // A single proxy going down (rate limit, outage) used to silently fail the
-// whole scan and paint every check red. Now we try several in turn and only
-// give up - with an honest "couldn't verify" message - if all of them fail.
+// whole scan and paint every check red. We now try SIX proxies in turn and
+// only give up - with an honest "couldn't verify" message - if all of them
+// fail. Order matters: cheapest/most-reliable-without-a-key first.
+//
+// NOTE for Tania: corsproxy.io recently started requiring a free API key
+// (10,000 requests/month free). If you sign up at corsproxy.io and get a
+// key, replace YOUR_CORSPROXY_KEY_HERE below to make that one work too -
+// it's left in the chain but will just fail harmlessly without a key.
+const CORSPROXY_IO_KEY = 'YOUR_CORSPROXY_KEY_HERE';
 const CORS_PROXIES = [
+  { build: u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u), extract: async res => await res.text() },
+  { build: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u), extract: async res => await res.text() },
+  { build: u => 'https://thingproxy.freeboard.io/fetch/' + u, extract: async res => await res.text() },
   { build: u => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u), extract: async res => (await res.json()).contents },
-  { build: u => 'https://corsproxy.io/?url=' + encodeURIComponent(u), extract: async res => await res.text() },
-  { build: u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u), extract: async res => await res.text() }
+  { build: u => 'https://corsproxy.io/?key=' + CORSPROXY_IO_KEY + '&url=' + encodeURIComponent(u), extract: async res => await res.text() },
+  { build: u => 'https://proxy.cors.sh/' + u, extract: async res => await res.text() }
 ];
+function timeout(ms) {
+  // A plain rejecting timer - deliberately NOT an AbortController/signal,
+  // because passing a signal into fetch() breaks inside some sandboxed
+  // preview environments that proxy fetch through postMessage (an
+  // AbortSignal can't be structured-cloned, which throws
+  // "DataCloneError: ... AbortSignal object could not be cloned").
+  // A bare timer works everywhere: real browsers, GitHub Pages, and
+  // sandboxed previews alike.
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('Timed out')), ms));
+}
 async function fetchViaProxies(url, timeoutMs = 9000) {
   let lastError = null;
   for (const proxy of CORS_PROXIES) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(proxy.build(url), { signal: controller.signal });
-      clearTimeout(timer);
+      const response = await Promise.race([fetch(proxy.build(url)), timeout(timeoutMs)]);
       if (!response.ok) { lastError = new Error(`HTTP ${response.status}`); continue; }
-      const html = await proxy.extract(response);
+      const html = await Promise.race([proxy.extract(response), timeout(timeoutMs)]);
       if (!html || html.length < 50) { lastError = new Error('Empty response'); continue; }
+      // Guard against a proxy silently handing back its own marketing/login
+      // page instead of the target site (this is what corsproxy.io does
+      // when no valid key is supplied) - such pages won't contain the
+      // target hostname anywhere in the markup.
+      try {
+        const targetHost = new URL(url).hostname.replace(/^www\./, '');
+        if (targetHost && !html.toLowerCase().includes(targetHost.toLowerCase())) {
+          lastError = new Error('Proxy returned unrelated content');
+          continue;
+        }
+      } catch (_) { /* ignore host-check errors, fall through to using html */ }
       return html;
     } catch (err) {
-      clearTimeout(timer);
       lastError = err;
       continue;
     }
@@ -487,8 +552,10 @@ async function runAudit(){
   window.lastRequest = null;
   document.getElementById('pdfReport').innerHTML = '';
 
-  // Reset secret button
-  secretClicks = 0;
+  // Reset secret button (both stages)
+  secretClicksStage1 = 0;
+  secretClicksStage2 = 0;
+  secretModal.classList.remove('show');
   secretPrintBtn.classList.remove('revealed');
   secretTrigger.innerHTML = 'Your professional report is ready. <span style="font-size:0.7rem;opacity:0.5;">🔑</span>';
 
