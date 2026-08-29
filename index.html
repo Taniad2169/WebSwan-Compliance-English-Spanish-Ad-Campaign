@@ -247,7 +247,6 @@ secretTrigger.addEventListener('click', function(e) {
     // Stage 1 complete - open the second modal for stage 2.
     secretClicksStage2 = 0;
     secretModalIcon.textContent = '🔐';
-    secretModalText.textContent = `Keep going... ${SECRET_THRESHOLD_2} more`;
     secretModal.classList.add('show');
   } else {
     let dots = '';
@@ -258,7 +257,6 @@ secretTrigger.addEventListener('click', function(e) {
 secretModalBox.addEventListener('click', function(e) {
   e.stopPropagation();
   secretClicksStage2++;
-  const remaining = SECRET_THRESHOLD_2 - secretClicksStage2;
 
   this.classList.add('pulse');
   setTimeout(() => { this.classList.remove('pulse'); }, 150);
@@ -270,8 +268,6 @@ secretModalBox.addEventListener('click', function(e) {
     setTimeout(() => {
       printReport();
     }, 400);
-  } else {
-    secretModalText.textContent = remaining > 0 ? `Keep going... ${remaining} more` : 'Unlocking...';
   }
 });
 secretPrintBtn.addEventListener('click', function(e) {
