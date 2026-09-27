@@ -464,20 +464,97 @@ async function scanWebsite(url) {
   }
   return results;
 }
+// ========== WEIGHTED SCORING ==========
+// Compliance signals (privacy, consent, accessibility) carry 4x the weight
+// of technical hygiene signals (lang, viewport, headings, etc). A site with
+// only one or two compliance signals cannot score in the 70s/80s, because
+// the math simply will not allow it, and hard ceilings enforce that further.
 function calculateScore(results) {
-  let score = 0;
-  let totalScored = 0;
+  const WEIGHTS = {
+    https:            1,   // technical hygiene
+    viewport:         1,
+    lang:             1,
+    headings:         1,
+    images:           1,
+    forms:            1,
+    landmarks:        1,
+    skipLink:         1,
+    privacyLink:      4,   // critical compliance
+    privacyDetails:   4,
+    consent:          4,
+    accessibilityLink:4
+  };
 
-  Object.values(results).forEach(c => {
-    if (c.status !== 'manual') {
-      totalScored++;
-      if (c.status === 'pass') score += 100;
-      else if (c.status === 'warn') score += 50;
-      else if (c.status === 'fail') score += 0;
-    }
+  let earned = 0;
+  let possible = 0;
+
+  Object.entries(results).forEach(([id, c]) => {
+    if (c.status === 'manual') return;          // manual checks don't score
+    const w = WEIGHTS[id] || 1;
+    possible += w;
+    if (c.status === 'pass')      earned += w;
+    else if (c.status === 'warn') earned += w * 0.5;
+    // fail = 0
   });
 
-  return totalScored > 0 ? Math.round(score / totalScored) : 0;
+  let score = possible > 0 ? Math.round((earned / possible) * 100) : 0;
+
+  // Hard ceiling: if a site has NO privacy policy AND NO consent controls,
+  // it cannot score above 50 no matter how clean the technical markup is.
+  const privacyOk = results.privacyLink?.status === 'pass' ||
+                    results.privacyDetails?.status === 'pass';
+  const consentOk = results.consent?.status === 'pass';
+  if (!privacyOk && !consentOk) {
+    score = Math.min(score, 50);
+  }
+
+  // Hard ceiling: if the ONLY compliance signal present is an accessibility
+  // link (no privacy, no consent, no disclosures), cap at 50 as well.
+  const compliancePasses = [
+    results.privacyLink?.status === 'pass',
+    results.privacyDetails?.status === 'pass',
+    results.consent?.status === 'pass',
+    results.accessibilityLink?.status === 'pass'
+  ].filter(Boolean).length;
+  if (compliancePasses <= 1) {
+    score = Math.min(score, 50);
+  }
+
+  return score;
+}
+// Builds a short human-readable explanation of WHY the score landed where it
+// did, shown directly under the score badge so the number is self-defending.
+function explainScore(results, score) {
+  const privacyOk = results.privacyLink?.status === 'pass' ||
+                    results.privacyDetails?.status === 'pass';
+  const consentOk = results.consent?.status === 'pass';
+  const adaOk = results.accessibilityLink?.status === 'pass';
+  const compliancePasses = [privacyOk, consentOk, adaOk].filter(Boolean).length;
+
+  const reasons = [];
+  if (!privacyOk) reasons.push(lang === 'es' ? 'sin política de privacidad' : 'no privacy policy');
+  if (!consentOk) reasons.push(lang === 'es' ? 'sin controles de consentimiento' : 'no consent controls');
+  if (!adaOk)    reasons.push(lang === 'es' ? 'sin declaración de accesibilidad' : 'no accessibility statement');
+
+  if (compliancePasses <= 1) {
+    const head = lang === 'es'
+      ? `Limitado a ${score}/100: solo ${compliancePasses} de 3 señales críticas de cumplimiento detectadas`
+      : `Capped at ${score}/100: only ${compliancePasses} of 3 critical compliance signals detected`;
+    return reasons.length ? `${head} (${reasons.join(', ')})` : head;
+  }
+  if (!privacyOk && !consentOk) {
+    return lang === 'es'
+      ? `Limitado a ${score}/100: faltan política de privacidad y controles de consentimiento`
+      : `Capped at ${score}/100: missing both privacy policy and consent controls`;
+  }
+  if (score >= 70) {
+    return lang === 'es'
+      ? 'Cumplimiento crítico cubierto; quedan mejoras menores'
+      : 'Critical compliance covered; minor improvements remain';
+  }
+  return lang === 'es'
+    ? `Puntuación ponderada: cumplimiento vale 4x, higiene técnica vale 1x`
+    : `Weighted score: compliance counts 4x, technical hygiene counts 1x`;
 }
 const copy = {
   en:{insights:'Digital Insights',subtitle:'Website accessibility · Privacy · Consent',language:'Language',googleTitle:'Google Updates',googleText:'Track confirmed Google search changes and expert analysis.',visitHub:'Visit hub',adaTitle:'ADA Resource',adaText:'Official U.S. Department of Justice web accessibility guidance.',readGuide:'Read the guidance',tagline:'Your Path to a Stronger Online Presence',checkerTitle:'Website Compliance Checker',checkerIntro:'Enter a website address. We inspect available live website evidence; we do not guess from the URL.',websiteLabel:'Website address',analyze:'Analyze',auditNotice:'Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.',report:'Website Screening Report',requestTitle:'Would you like help with the findings?',name:'Full name',phone:'Phone number',email:'Email address',business:'Business name',website:'Website',service:'Service needed',chooseService:'Choose a service',fullAnalysis:'Full Website Analysis',audit:'Compliance Audit',demo:'Complimentary Website Demo',phoneApp:'Custom Phone Application',receptionist:'Virtual Receptionist',social:'Social Media Marketing',advertising:'Online Advertising',other:'Other',message:'How can we help?',consent:'I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.',sendRequest:'Request Help',reportReady:'Your professional report is ready.',printReport:'Print Report',downloadPdf:'Download PDF',stateTitle:'Jurisdiction Information',stateIntro:'Select the state where your business operates to see specific compliance requirements, penalties, and official resources.',viewInfo:'View information',packages:'View Website Packages',privacy:'Privacy Policy',selectPlace:'Choose a state',checking:'Inspecting the live website…',unable:'Unable to verify this website right now. No score was generated - please try again in a moment, or double-check the address.',score:'Automated evidence score',screened:'Screened',manualReview:'Manual review still required',pass:'Evidence found',warn:'Partial evidence',fail:'Not detected',manual:'Manual test required',formSent:'Thank you. Your request was received.',formError:'The request could not be submitted. Please try again.',selectFirst:'Please select a location.',invalidDomain:'Enter a valid website address (e.g., https://www.business.com)'},
@@ -565,7 +642,8 @@ async function runAudit(){
       evidenceValues: { details: data.evidence }
     }));
     const score = calculateScore(scanResults);
-    const data = { ok: true, score: score, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks };
+    const explanation = explainScore(scanResults, score);
+    const data = { ok: true, score: score, explanation: explanation, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks };
     window.lastAudit = data;
     renderAudit(data);
     document.getElementById('requestWebsite').value = data.finalUrl || url;
@@ -589,7 +667,13 @@ async function runAudit(){
 function renderEvidence(c){ return c.evidenceValues?.details || ''; }
 function renderAudit(data){
   document.getElementById('resultTitle').textContent=(data.hostname||'')+' · '+t('report');
-  document.getElementById('summary').innerHTML=`<div class="score"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div><span class="evidence">${t('manualReview')}</span>`;
+  // Score badge colour reflects the actual number: green >= 70, amber 50-69,
+  // red < 50. The number and the colour can no longer disagree.
+  const scoreColor = data.score >= 70 ? '#17864a'
+                   : data.score >= 50 ? '#c46a00'
+                   : '#b52d21';
+  const explanation = data.explanation ? `<span class="evidence" style="color:#37566e;font-weight:600;">${escapeHtml(data.explanation)}</span>` : '';
+  document.getElementById('summary').innerHTML=`<div class="score" style="background:${scoreColor}"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div>${explanation}<span class="evidence">${t('manualReview')}</span>`;
   document.getElementById('checks').innerHTML=data.checks.map(c=>{
     const status=c.status||'manual';
     const icon=status==='pass'?'fa-circle-check':status==='fail'?'fa-circle-xmark':status==='warn'?'fa-triangle-exclamation':'fa-hand';
@@ -609,8 +693,9 @@ function buildProfessionalReport(requestData){
   const details=detailFields.map(([key,label])=>`<div class="${key==='message'?'wide':''}"><span class="export-label">${escapeHtml(label)}</span>${escapeHtml(requestData[key])}</div>`).join('');
   const requestSection = detailFields.length ? `<section class="export-section"><h2>${lang==='es'?'Detalles de la solicitud':'Request details'}</h2><div class="export-request">${details}</div></section>` : '';
   const findings=(data.checks||[]).map(c=>`<div class="export-check ${escapeHtml(c.status||'manual')}"><strong>${escapeHtml(labels[c.id]||c.id)}</strong><small>${escapeHtml(t(c.status||'manual'))}${renderEvidence(c)?' - '+escapeHtml(renderEvidence(c)):''}</small></div>`).join('');
+  const explanation = data.explanation ? `<section class="export-section"><h2>${lang==='es'?'Por qué esta puntuación':'Why this score'}</h2><div class="export-check manual">${escapeHtml(data.explanation)}</div></section>` : '';
   const report=document.getElementById('pdfReport');
-  report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section><section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section>${requestSection}<div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
+  report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section>${explanation}<section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section>${requestSection}<div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
   report.dataset.filename=`webswan-compliance-report-${String(data.hostname||'website').replace(/[^a-z0-9.-]+/gi,'-')}.pdf`;
 }
 function printReport() {
