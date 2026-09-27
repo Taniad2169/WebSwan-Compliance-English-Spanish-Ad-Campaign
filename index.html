@@ -352,6 +352,21 @@ async function scanWebsite(url) {
   // Let failures here propagate to the caller instead of being swallowed -
   // that's what let a dead proxy masquerade as a bad scorecard before.
   const html = await fetchViaProxies(url);
+  // Detect pages that render most of their content client-side (React,
+  // Vue, Next.js, Angular, etc). On these sites the raw HTML we fetch is
+  // mostly an empty shell - the real cookie banner, accessibility widget,
+  // and even page copy only exist after JavaScript runs, which this scan
+  // never does. Strip tags/scripts/styles and measure what visible text
+  // is actually present in the raw markup; a near-empty shell plus a
+  // known SPA root marker means the scan likely missed real content.
+  const visibleText = html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const looksJsRendered = visibleText.length < 400 &&
+    /id=["']?(root|app|__next|___gatsby)["']?|ng-app|data-reactroot|data-server-rendered/i.test(html);
   // Check HTTPS
   if (url.startsWith('https://')) {
     results.https.status = 'pass';
@@ -377,21 +392,59 @@ async function scanWebsite(url) {
   } else {
     results.privacyDetails.evidence = 'No privacy disclosures found';
   }
-  // Check for Cookie/Consent controls
+  // Check for Cookie/Consent controls - and whether the control is a PROPER
+  // consent mechanism (an explicit reject/decline option alongside accept)
+  // versus an "I understand / Accept" notice that isn't real consent.
+  //
+  // IMPORTANT LIMITATION: many cookie banners are injected by JavaScript
+  // after the page loads (OneTrust, Cookiebot, Termly, iubenda, CookieYes,
+  // Osano, TrustArc, Didomi, Usercentrics, Klaro, Google Funding Choices,
+  // etc). This scan reads raw HTML only - it does not execute JavaScript -
+  // so the banner's actual on-screen wording is often invisible to us even
+  // though the tool is really there. To avoid unfairly failing sites that
+  // use one of these reputable platforms, we separately detect the vendor's
+  // script tag/domain and treat that as evidence of a proper consent tool,
+  // since these platforms default to offering a reject/manage option.
   const consentPatterns = /cookie|consent|opt-out|cookie notice|cookie banner|accept cookies|reject cookies|tracking/i;
+  const consentRejectPatterns = /reject|decline|deny|refuse|only necessary|essential (cookies )?only|no,? thanks|do not accept|manage preferences|customi[sz]e (cookies|preferences)|cookie settings|accept all.*reject all|reject all.*accept all/i;
+  const cmpVendorPatterns = /cookiebot|onetrust|cookielaw\.org|cookiepro|termly\.io|iubenda|cookieyes|osano\.com|trustarc|truste\.com|didomi|usercentrics|klaro|cookiehub|cookie-?script\.com|civicuk|fundingchoicesmessages\.google|quantcast.*choice/i;
   const hasConsent = consentPatterns.test(html);
-  if (hasConsent) {
+  const hasCmpVendor = cmpVendorPatterns.test(html);
+  const hasProperConsentText = hasConsent && consentRejectPatterns.test(html);
+  if (hasProperConsentText || hasCmpVendor) {
     results.consent.status = 'pass';
-    results.consent.evidence = 'Consent controls detected';
+    results.consent.evidence = (hasCmpVendor && !hasProperConsentText)
+      ? 'Recognized consent-management platform detected in page scripts (these default to including a reject/manage option, even if not visible in the raw HTML text)'
+      : 'Consent control found with an accept AND a reject/decline option';
+  } else if (hasConsent) {
+    results.consent.status = 'warn';
+    results.consent.evidence = 'Cookie/consent notice found, but no reject or decline option detected - accept-only is not proper consent';
   } else {
     results.consent.evidence = 'No consent controls detected';
   }
-  // Check for Accessibility link
+  // Check for Accessibility statement - and whether it actually references a
+  // WCAG (or Section 508) conformance level, versus a generic "we care about
+  // accessibility" statement with nothing backing it up. Accessibility
+  // OVERLAY WIDGETS (UserWay, AccessiBe, EqualWeb, AudioEye-style tools) are
+  // detected separately and are deliberately NOT auto-passed: these tools
+  // are widely documented as failing to achieve real WCAG conformance on
+  // their own and are increasingly named in ADA lawsuits, so their presence
+  // alone is flagged as improper rather than credited as compliance.
   const accessPatterns = /accessibility|wcag|section 508|a11y|accessible/i;
+  const wcagLevelPatterns = /wcag\s*2(\.[0-4])?|web content accessibility guidelines|level\s*a{1,3}\b|section\s*508/i;
+  const a11yOverlayPatterns = /userway|accessibe|acsbap|equalweb|audioeye|accessibility-?widget|a11y-?widget/i;
   const hasAccessibility = accessPatterns.test(html);
-  if (hasAccessibility) {
+  const hasProperAccessibility = hasAccessibility && wcagLevelPatterns.test(html);
+  const hasOverlayWidget = a11yOverlayPatterns.test(html);
+  if (hasProperAccessibility) {
     results.accessibilityLink.status = 'pass';
-    results.accessibilityLink.evidence = 'Accessibility resource detected';
+    results.accessibilityLink.evidence = 'Accessibility statement references a WCAG/Section 508 conformance level';
+  } else if (hasOverlayWidget) {
+    results.accessibilityLink.status = 'warn';
+    results.accessibilityLink.evidence = 'An accessibility overlay widget was detected (UserWay/AccessiBe-style tool) - these do not reliably achieve WCAG conformance on their own; treat as improper without a documented WCAG statement';
+  } else if (hasAccessibility) {
+    results.accessibilityLink.status = 'warn';
+    results.accessibilityLink.evidence = 'Accessibility mention found, but no WCAG conformance level specified - statement is incomplete';
   } else {
     results.accessibilityLink.evidence = 'No accessibility resource detected';
   }
@@ -462,13 +515,29 @@ async function scanWebsite(url) {
   } else {
     results.skipLink.evidence = 'No skip link detected';
   }
-  return results;
+  return { checks: results, looksJsRendered };
 }
 // ========== WEIGHTED SCORING ==========
 // Compliance signals (privacy, consent, accessibility) carry 4x the weight
-// of technical hygiene signals (lang, viewport, headings, etc). A site with
-// only one or two compliance signals cannot score in the 70s/80s, because
-// the math simply will not allow it, and hard ceilings enforce that further.
+// of technical hygiene signals (lang, viewport, headings, etc). On top of
+// that weighting, three hard tiers reflect how real the compliance is:
+//
+//   10  - NOTHING detected at all: no privacy policy, no cookie/consent
+//         notice, no accessibility statement. This is a fixed floor, not
+//         a 0, because a scan that found nothing is still a completed
+//         scan - but it must never be inflated by clean technical markup.
+//   46  - Something is THERE but implemented improperly - e.g. a cookie
+//         notice that only offers "Accept" with no reject/decline option,
+//         or an accessibility statement with no WCAG conformance level
+//         named. This sits below "partial" because presenting fake
+//         compliance is worse than simply not having gotten to it yet.
+//   50  - Partial: one real compliance element is properly in place, but
+//         not enough of them (e.g. privacy policy, but no consent tool
+//         and no accessibility statement).
+//
+// Anything above these tiers is only reachable when privacy, consent AND
+// accessibility are ALL properly implemented - at that point the normal
+// weighted formula applies and the score can run up to 100.
 function calculateScore(results) {
   const WEIGHTS = {
     https:            1,   // technical hygiene
@@ -497,55 +566,85 @@ function calculateScore(results) {
     // fail = 0
   });
 
-  let score = possible > 0 ? Math.round((earned / possible) * 100) : 0;
+  const rawScore = possible > 0 ? Math.round((earned / possible) * 100) : 0;
 
-  // Hard ceiling: if a site has NO privacy policy AND NO consent controls,
-  // it cannot score above 50 no matter how clean the technical markup is.
   const privacyOk = results.privacyLink?.status === 'pass' ||
                     results.privacyDetails?.status === 'pass';
-  const consentOk = results.consent?.status === 'pass';
-  if (!privacyOk && !consentOk) {
-    score = Math.min(score, 50);
+  const consentStatus = results.consent?.status;
+  const accessStatus = results.accessibilityLink?.status;
+
+  // Tier 1: nothing detected at all - not even an improper attempt.
+  const noSignalsAtAll =
+    results.privacyLink?.status === 'fail' &&
+    results.privacyDetails?.status === 'fail' &&
+    consentStatus === 'fail' &&
+    accessStatus === 'fail';
+  if (noSignalsAtAll) {
+    return 10;
   }
 
-  // Hard ceiling: if the ONLY compliance signal present is an accessibility
-  // link (no privacy, no consent, no disclosures), cap at 50 as well.
-  const compliancePasses = [
-    results.privacyLink?.status === 'pass',
-    results.privacyDetails?.status === 'pass',
-    results.consent?.status === 'pass',
-    results.accessibilityLink?.status === 'pass'
-  ].filter(Boolean).length;
+  // Tier 2: a compliance element exists but is implemented improperly
+  // (accept-only cookie notice, or an accessibility statement with no
+  // WCAG level named). This overrides the partial-compliance tier below
+  // because "present but wrong" is worse than "simply not there yet".
+  if (consentStatus === 'warn' || accessStatus === 'warn') {
+    return Math.min(rawScore, 46);
+  }
+
+  // Tier 3: partial compliance - only one of the three critical elements
+  // (privacy, consent, accessibility) is properly in place.
+  const compliancePasses = [privacyOk, consentStatus === 'pass', accessStatus === 'pass']
+    .filter(Boolean).length;
   if (compliancePasses <= 1) {
-    score = Math.min(score, 50);
+    return Math.min(rawScore, 50);
   }
 
-  return score;
+  return rawScore;
 }
 // Builds a short human-readable explanation of WHY the score landed where it
 // did, shown directly under the score badge so the number is self-defending.
 function explainScore(results, score) {
   const privacyOk = results.privacyLink?.status === 'pass' ||
                     results.privacyDetails?.status === 'pass';
-  const consentOk = results.consent?.status === 'pass';
-  const adaOk = results.accessibilityLink?.status === 'pass';
-  const compliancePasses = [privacyOk, consentOk, adaOk].filter(Boolean).length;
+  const consentStatus = results.consent?.status;
+  const accessStatus = results.accessibilityLink?.status;
 
-  const reasons = [];
-  if (!privacyOk) reasons.push(lang === 'es' ? 'sin política de privacidad' : 'no privacy policy');
-  if (!consentOk) reasons.push(lang === 'es' ? 'sin controles de consentimiento' : 'no consent controls');
-  if (!adaOk)    reasons.push(lang === 'es' ? 'sin declaración de accesibilidad' : 'no accessibility statement');
+  const noSignalsAtAll =
+    results.privacyLink?.status === 'fail' &&
+    results.privacyDetails?.status === 'fail' &&
+    consentStatus === 'fail' &&
+    accessStatus === 'fail';
 
-  if (compliancePasses <= 1) {
-    const head = lang === 'es'
-      ? `Limitado a ${score}/100: solo ${compliancePasses} de 3 señales críticas de cumplimiento detectadas`
-      : `Capped at ${score}/100: only ${compliancePasses} of 3 critical compliance signals detected`;
-    return reasons.length ? `${head} (${reasons.join(', ')})` : head;
-  }
-  if (!privacyOk && !consentOk) {
+  if (noSignalsAtAll) {
     return lang === 'es'
-      ? `Limitado a ${score}/100: faltan política de privacidad y controles de consentimiento`
-      : `Capped at ${score}/100: missing both privacy policy and consent controls`;
+      ? `Puntuación de ${score}/100: no se detectó ninguna señal de cumplimiento (sin política de privacidad, sin aviso de cookies, sin declaración de accesibilidad)`
+      : `Score of ${score}/100: no compliance signals detected at all - no privacy policy, no cookie/consent notice, no accessibility statement`;
+  }
+
+  const improperReasons = [];
+  if (consentStatus === 'warn') {
+    improperReasons.push(lang === 'es'
+      ? 'el aviso de cookies solo ofrece "aceptar", sin opción de rechazar'
+      : 'the cookie notice only offers "accept", with no reject/decline option');
+  }
+  if (accessStatus === 'warn') {
+    improperReasons.push(lang === 'es'
+      ? 'la declaración de accesibilidad no especifica un nivel de cumplimiento WCAG'
+      : "the accessibility statement doesn't name a WCAG conformance level");
+  }
+  if (improperReasons.length) {
+    const head = lang === 'es'
+      ? `Limitado a ${score}/100: cumplimiento presente pero implementado incorrectamente`
+      : `Capped at ${score}/100: compliance element present but implemented incorrectly`;
+    return `${head} (${improperReasons.join('; ')})`;
+  }
+
+  const compliancePasses = [privacyOk, consentStatus === 'pass', accessStatus === 'pass']
+    .filter(Boolean).length;
+  if (compliancePasses <= 1) {
+    return lang === 'es'
+      ? `Limitado a ${score}/100: cumplimiento parcial - solo ${compliancePasses} de 3 señales críticas correctamente implementadas`
+      : `Capped at ${score}/100: partial compliance - only ${compliancePasses} of 3 critical signals properly implemented`;
   }
   if (score >= 70) {
     return lang === 'es'
@@ -555,6 +654,11 @@ function explainScore(results, score) {
   return lang === 'es'
     ? `Puntuación ponderada: cumplimiento vale 4x, higiene técnica vale 1x`
     : `Weighted score: compliance counts 4x, technical hygiene counts 1x`;
+}
+function jsRenderedNote() {
+  return lang === 'es'
+    ? '⚠ Este sitio parece renderizar su contenido con JavaScript. Este análisis solo lee el HTML inicial, así que avisos de cookies, widgets de accesibilidad u otro contenido inyectado por JavaScript pueden no ser visibles en este escaneo. Se recomienda verificación manual.'
+    : "⚠ This site appears to render its content with JavaScript. This scan reads only the initial HTML, so cookie banners, accessibility widgets, or other JavaScript-injected content may not be visible here. Manual verification is recommended before relying on this score.";
 }
 const copy = {
   en:{insights:'Digital Insights',subtitle:'Website accessibility · Privacy · Consent',language:'Language',googleTitle:'Google Updates',googleText:'Track confirmed Google search changes and expert analysis.',visitHub:'Visit hub',adaTitle:'ADA Resource',adaText:'Official U.S. Department of Justice web accessibility guidance.',readGuide:'Read the guidance',tagline:'Your Path to a Stronger Online Presence',checkerTitle:'Website Compliance Checker',checkerIntro:'Enter a website address. We inspect available live website evidence; we do not guess from the URL.',websiteLabel:'Website address',analyze:'Analyze',auditNotice:'Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.',report:'Website Screening Report',requestTitle:'Would you like help with the findings?',name:'Full name',phone:'Phone number',email:'Email address',business:'Business name',website:'Website',service:'Service needed',chooseService:'Choose a service',fullAnalysis:'Full Website Analysis',audit:'Compliance Audit',demo:'Complimentary Website Demo',phoneApp:'Custom Phone Application',receptionist:'Virtual Receptionist',social:'Social Media Marketing',advertising:'Online Advertising',other:'Other',message:'How can we help?',consent:'I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.',sendRequest:'Request Help',reportReady:'Your professional report is ready.',printReport:'Print Report',downloadPdf:'Download PDF',stateTitle:'Jurisdiction Information',stateIntro:'Select the state where your business operates to see specific compliance requirements, penalties, and official resources.',viewInfo:'View information',packages:'View Website Packages',privacy:'Privacy Policy',selectPlace:'Choose a state',checking:'Inspecting the live website…',unable:'Unable to verify this website right now. No score was generated - please try again in a moment, or double-check the address.',score:'Automated evidence score',screened:'Screened',manualReview:'Manual review still required',pass:'Evidence found',warn:'Partial evidence',fail:'Not detected',manual:'Manual test required',formSent:'Thank you. Your request was received.',formError:'The request could not be submitted. Please try again.',selectFirst:'Please select a location.',invalidDomain:'Enter a valid website address (e.g., https://www.business.com)'},
@@ -633,7 +737,7 @@ async function runAudit(){
   secretTrigger.innerHTML = 'Your professional report is ready. <span style="font-size:0.7rem;opacity:0.5;">🔑</span>';
 
   try{
-    const scanResults = await scanWebsite(url);
+    const { checks: scanResults, looksJsRendered } = await scanWebsite(url);
     const hostname = new URL(url).hostname;
     const checks = Object.entries(scanResults).map(([id, data]) => ({
       id: id,
@@ -643,7 +747,7 @@ async function runAudit(){
     }));
     const score = calculateScore(scanResults);
     const explanation = explainScore(scanResults, score);
-    const data = { ok: true, score: score, explanation: explanation, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks };
+    const data = { ok: true, score: score, explanation: explanation, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks, looksJsRendered: looksJsRendered };
     window.lastAudit = data;
     renderAudit(data);
     document.getElementById('requestWebsite').value = data.finalUrl || url;
@@ -673,7 +777,8 @@ function renderAudit(data){
                    : data.score >= 50 ? '#c46a00'
                    : '#b52d21';
   const explanation = data.explanation ? `<span class="evidence" style="color:#37566e;font-weight:600;">${escapeHtml(data.explanation)}</span>` : '';
-  document.getElementById('summary').innerHTML=`<div class="score" style="background:${scoreColor}"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div>${explanation}<span class="evidence">${t('manualReview')}</span>`;
+  const jsNote = data.looksJsRendered ? `<span class="evidence" style="color:#b52d21;font-weight:600;">${escapeHtml(jsRenderedNote())}</span>` : '';
+  document.getElementById('summary').innerHTML=`<div class="score" style="background:${scoreColor}"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div>${explanation}${jsNote}<span class="evidence">${t('manualReview')}</span>`;
   document.getElementById('checks').innerHTML=data.checks.map(c=>{
     const status=c.status||'manual';
     const icon=status==='pass'?'fa-circle-check':status==='fail'?'fa-circle-xmark':status==='warn'?'fa-triangle-exclamation':'fa-hand';
@@ -694,8 +799,9 @@ function buildProfessionalReport(requestData){
   const requestSection = detailFields.length ? `<section class="export-section"><h2>${lang==='es'?'Detalles de la solicitud':'Request details'}</h2><div class="export-request">${details}</div></section>` : '';
   const findings=(data.checks||[]).map(c=>`<div class="export-check ${escapeHtml(c.status||'manual')}"><strong>${escapeHtml(labels[c.id]||c.id)}</strong><small>${escapeHtml(t(c.status||'manual'))}${renderEvidence(c)?' - '+escapeHtml(renderEvidence(c)):''}</small></div>`).join('');
   const explanation = data.explanation ? `<section class="export-section"><h2>${lang==='es'?'Por qué esta puntuación':'Why this score'}</h2><div class="export-check manual">${escapeHtml(data.explanation)}</div></section>` : '';
+  const jsNoteSection = data.looksJsRendered ? `<section class="export-section"><h2>${lang==='es'?'Nota importante':'Important note'}</h2><div class="export-check warn">${escapeHtml(jsRenderedNote())}</div></section>` : '';
   const report=document.getElementById('pdfReport');
-  report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section>${explanation}<section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section>${requestSection}<div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
+  report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section>${explanation}${jsNoteSection}<section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section>${requestSection}<div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
   report.dataset.filename=`webswan-compliance-report-${String(data.hostname||'website').replace(/[^a-z0-9.-]+/gi,'-')}.pdf`;
 }
 function printReport() {
