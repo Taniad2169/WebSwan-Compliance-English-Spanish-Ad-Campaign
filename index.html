@@ -50,8 +50,25 @@
     .checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .check{background:#fff;border:1px solid #dce8f1;border-radius:10px;padding:10px;font-size:.8rem;color:#1f3c54}
     .check i{margin-right:6px}
-    .pass i{color:#17864a}.warn i{color:#c46a00}.fail i{color:#b52d21}.manual i{color:#1e6f9f}
+    .pass i{color:#17864a}.warn i{color:#c46a00}.fail i{color:#b52d21}.manual i{color:#1e6f9f}.na i{color:#8aa0b2}
     .evidence{display:block;margin-top:4px;color:#63798b;font-size:.73rem}
+    .wcag-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#e3f2fd;color:#0d47a1;font-size:.66rem;font-weight:800;vertical-align:middle;white-space:nowrap}
+    .wcag-block{display:none;margin-top:16px}
+    .wcag-block.show{display:block}
+    .wcag-block h3{font-size:.95rem;margin-bottom:4px;color:#0a1e2f}
+    .wcag-block h3 i{color:#1e6f9f;margin-right:6px}
+    .wcag-block .wcag-sub{font-size:.75rem;color:#37566e;margin-bottom:10px}
+    .wcag-full{margin-top:14px;border:2px solid #b8d9ec;border-radius:14px;background:#fff}
+    .wcag-full summary{cursor:pointer;padding:12px 14px;font-weight:800;font-size:.88rem;color:#0a1e2f;list-style-position:inside}
+    .wcag-full summary small{display:block;font-weight:600;color:#37566e;font-size:.74rem;margin-top:3px}
+    .wcag-table{width:100%;border-collapse:collapse;font-size:.76rem}
+    .wcag-table th{text-align:left;background:#eef8ff;color:#0a1e2f;padding:7px 8px;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+    .wcag-table td{padding:7px 8px;border-top:1px solid #e3edf5;vertical-align:top;color:#1f3c54}
+    .wcag-table td.sc{white-space:nowrap;font-weight:800;color:#0d47a1}
+    .wcag-table .st{font-weight:800;white-space:nowrap}
+    .wcag-table .st.pass{color:#17864a}.wcag-table .st.fail{color:#b52d21}.wcag-table .st.warn{color:#c46a00}.wcag-table .st.manual{color:#1e6f9f}.wcag-table .st.na{color:#63798b}
+    .wcag-table .ev{display:block;color:#63798b;font-size:.7rem;margin-top:2px}
+    @media(max-width:700px){.wcag-table th:nth-child(3),.wcag-table td:nth-child(3){display:none}}
     .report-actions-top{display:none;margin-top:14px;padding:14px;border:2px solid #b8d9ec;border-radius:16px;background:#eef8ff;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
     .report-actions-top.show{display:flex}
     .report-actions-top p{flex:1;min-width:200px;color:#1f3c54;font-size:.82rem;font-weight:700;text-align:center;cursor:pointer;transition:all 0.3s;padding:8px 16px;border-radius:12px}
@@ -95,6 +112,7 @@
     .export-check.warn{border-left-color:#c46a00}
     .export-check.fail{border-left-color:#b52d21}
     .export-check.manual{border-left-color:#1e6f9f}
+    .export-check.na{border-left-color:#8aa0b2}
     .export-check small{display:block;color:#63798b;margin-top:3px}
     .export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .export-request .wide{grid-column:1/-1}
@@ -105,8 +123,12 @@
     .state-result{display:none;margin-top:13px;padding:16px;background:#f8faff;border:2px solid #dce8f1;border-radius:12px;font-size:.85rem;line-height:1.6}
     .state-result.show{display:block}
     .state-result h3{color:#1e6f9f;margin-bottom:6px;font-size:1rem}
+    .state-result h4{color:#0a1e2f;margin:12px 0 2px;font-size:.9rem}
     .state-result .penalty{background:#fff3e0;border-left:4px solid #e65100;padding:10px 14px;border-radius:6px;margin:8px 0}
     .state-result .requirement{background:#e3f2fd;border-left:4px solid #0d47a1;padding:10px 14px;border-radius:6px;margin:8px 0}
+    .state-result .fed{background:#f1f8e9;border-left:4px solid #33691e;padding:10px 14px;border-radius:6px;margin:8px 0}
+    .state-result ul{margin:6px 0 0 20px}
+    .state-result .asof{font-size:.72rem;color:#63798b;margin-top:8px}
     .state-result .link-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
     .state-result .link-list a{background:#1e6f9f;color:#fff;padding:6px 14px;border-radius:999px;text-decoration:none;font-size:.78rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s}
     .state-result .link-list a:hover{background:#0a1e2f;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
@@ -167,6 +189,17 @@
       <div class="result-body">
         <div id="summary" class="status"></div>
         <div id="checks" class="checks"></div>
+
+        <!-- WCAG 2.2 Level A/AA checkpoints (shown separately; NOT part of the score) -->
+        <div id="wcagBlock" class="wcag-block">
+          <h3><i class="fa-solid fa-universal-access"></i><span data-i18n="wcagTitle">WCAG 2.2 Level A / AA checkpoints</span></h3>
+          <p class="wcag-sub" data-i18n="wcagSub">Each item is tied to its WCAG success criterion. These findings are shown for detail and do not change the score above.</p>
+          <div id="wcagChecks" class="checks"></div>
+          <details id="wcagFull" class="wcag-full">
+            <summary><span data-i18n="wcagFullTitle">Full WCAG 2.2 Level A &amp; AA checklist - all 55 success criteria</span><small id="wcagFullSummary"></small></summary>
+            <div id="wcagFullTable"></div>
+          </details>
+        </div>
 
         <div id="reportActionsTop" class="report-actions-top">
           <p id="secretTrigger" data-i18n="reportReady">Your professional report is ready. <span style="font-size:0.7rem;opacity:0.5;">🔑</span></p>
@@ -331,6 +364,8 @@ async function fetchViaProxies(url, timeoutMs = 9000) {
   throw lastError || new Error('All proxies failed');
 }
 // ========== THE ACCURATE SCANNING LOGIC ==========
+// (Unchanged. The scored checks below work exactly as before. The new WCAG
+// checkpoints run separately in scanWcag() and never touch the score.)
 async function scanWebsite(url) {
   const results = {
     https: { status: 'fail', evidence: '' },
@@ -515,8 +550,323 @@ async function scanWebsite(url) {
   } else {
     results.skipLink.evidence = 'No skip link detected';
   }
-  return { checks: results, looksJsRendered };
+  // WCAG checkpoints - separate, unscored. Wrapped so a parsing problem can
+  // never break or change the scored scan above.
+  let wcag = [];
+  try { wcag = scanWcag(html); } catch (e) { console.warn('WCAG checkpoint scan skipped:', e); }
+  return { checks: results, looksJsRendered, wcag };
 }
+
+// ========== WCAG 2.2 LEVEL A / AA CHECKPOINTS (NOT SCORED) ==========
+// Parses the same raw HTML with DOMParser (scripts never run in a parsed
+// document) and tests the WCAG success criteria that can be verified from
+// markup. Anything that needs a human (contrast, focus, zoom behaviour,
+// the WCAG 2.2 additions) is listed as "manual" rather than guessed.
+// Status meanings: pass / warn / fail / manual / na (nothing to test).
+const WCAG_VAGUE_LINK = /^(click here|here|read more|more|learn more|more info|details|link|this|go)$/i;
+function accName(el, doc) {
+  const aria = (el.getAttribute('aria-label') || '').trim();
+  if (aria) return aria;
+  const lb = (el.getAttribute('aria-labelledby') || '').trim();
+  if (lb) {
+    const txt = lb.split(/\s+/).map(id => { const r = doc.getElementById(id); return r ? r.textContent.trim() : ''; }).join(' ').trim();
+    if (txt) return txt;
+  }
+  const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+  if (text) return text;
+  const imgAlt = [...el.querySelectorAll('img[alt]')].map(i => i.getAttribute('alt').trim()).join(' ').trim();
+  if (imgAlt) return imgAlt;
+  const svgTitle = el.querySelector('svg title');
+  if (svgTitle && svgTitle.textContent.trim()) return svgTitle.textContent.trim();
+  if (el.tagName === 'INPUT' && (el.getAttribute('value') || '').trim()) return el.getAttribute('value').trim();
+  const title = (el.getAttribute('title') || '').trim();
+  return title;
+}
+function scanWcag(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const out = [];
+  const add = (id, sc, level, status, evidence) => out.push({ id, sc, level, status, evidence });
+  const isHidden = el => el.closest('[hidden],[aria-hidden="true"]') !== null || /display\s*:\s*none/i.test(el.getAttribute('style') || '');
+
+  // 2.4.2 Page Titled (A)
+  const title = (doc.querySelector('title')?.textContent || '').trim();
+  add('pageTitle', '2.4.2', 'A', title ? 'pass' : 'fail', title ? `Title: "${title.slice(0, 70)}"` : 'Page has no <title>');
+
+  // 1.1.1 Non-text Content (A) - image buttons, image-map areas, role="img"
+  const nonText = [
+    ...doc.querySelectorAll('input[type="image"]:not([alt]), input[type="image"][alt=""]'),
+    ...doc.querySelectorAll('area[href]:not([alt])'),
+    ...[...doc.querySelectorAll('[role="img"]')].filter(e => !accName(e, doc))
+  ];
+  const nonTextTotal = doc.querySelectorAll('input[type="image"], area[href], [role="img"]').length;
+  add('nonText', '1.1.1', 'A', nonTextTotal === 0 ? 'na' : nonText.length ? 'fail' : 'pass',
+    nonTextTotal === 0 ? 'No image buttons, image maps or role="img" elements to test' :
+    nonText.length ? `${nonText.length} of ${nonTextTotal} image buttons / image-map areas / role="img" elements have no text alternative` :
+    `All ${nonTextTotal} image buttons / image-map areas / role="img" elements have a text alternative`);
+
+  // 1.3.1 Info & Relationships + 4.1.2 Name, Role, Value + 3.3.2 Labels (A) - every field needs a label
+  const fields = [...doc.querySelectorAll('input, select, textarea')].filter(el => {
+    const tp = (el.getAttribute('type') || '').toLowerCase();
+    return !['hidden', 'submit', 'button', 'reset', 'image'].includes(tp) && !isHidden(el);
+  });
+  let unlabeled = 0, placeholderOnly = 0;
+  fields.forEach(el => {
+    const id = el.getAttribute('id');
+    const hasFor = id && [...doc.querySelectorAll('label[for]')].some(l => l.getAttribute('for') === id && l.textContent.trim());
+    const wrapped = el.closest('label') && el.closest('label').textContent.trim();
+    const aria = (el.getAttribute('aria-label') || '').trim() || (el.getAttribute('aria-labelledby') || '').trim();
+    const title = (el.getAttribute('title') || '').trim();
+    if (!(hasFor || wrapped || aria || title)) { unlabeled++; if ((el.getAttribute('placeholder') || '').trim()) placeholderOnly++; }
+  });
+  add('fieldLabels', '1.3.1 · 3.3.2 · 4.1.2', 'A', fields.length === 0 ? 'na' : unlabeled ? 'fail' : 'pass',
+    fields.length === 0 ? 'No form fields in the page markup' :
+    unlabeled ? `${unlabeled} of ${fields.length} form fields have no programmatic label${placeholderOnly ? ` (${placeholderOnly} rely on placeholder text only, which is not a label)` : ''}` :
+    `All ${fields.length} form fields have a programmatic label`);
+
+  // 4.1.2 Name, Role, Value (A) - buttons need an accessible name
+  const buttons = [...doc.querySelectorAll('button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"]')].filter(b => !isHidden(b));
+  const namelessBtns = buttons.filter(b => {
+    const tp = (b.getAttribute('type') || '').toLowerCase();
+    if (b.tagName === 'INPUT' && (tp === 'submit' || tp === 'reset') && !b.hasAttribute('value')) return false; // browser supplies "Submit"/"Reset"
+    return !accName(b, doc);
+  });
+  add('buttonNames', '4.1.2', 'A', buttons.length === 0 ? 'na' : namelessBtns.length ? 'fail' : 'pass',
+    buttons.length === 0 ? 'No buttons in the page markup' :
+    namelessBtns.length ? `${namelessBtns.length} of ${buttons.length} buttons have no accessible name (e.g. icon-only buttons without aria-label)` :
+    `All ${buttons.length} buttons have an accessible name`);
+
+  // 2.4.4 Link Purpose (In Context) (A)
+  const links = [...doc.querySelectorAll('a[href]')].filter(a => !isHidden(a));
+  const emptyLinks = links.filter(a => !accName(a, doc));
+  const vagueLinks = links.filter(a => { const n = accName(a, doc); return n && WCAG_VAGUE_LINK.test(n.replace(/[.»›→>]+$/, '').trim()); });
+  add('linkPurpose', '2.4.4', 'A', links.length === 0 ? 'na' : emptyLinks.length ? 'fail' : vagueLinks.length ? 'warn' : 'pass',
+    links.length === 0 ? 'No links in the page markup' :
+    emptyLinks.length ? `${emptyLinks.length} of ${links.length} links have no text or accessible name${vagueLinks.length ? `; ${vagueLinks.length} use vague text like "click here" / "read more"` : ''}` :
+    vagueLinks.length ? `${vagueLinks.length} of ${links.length} links use vague text like "click here" / "read more" - check the surrounding context explains them` :
+    `All ${links.length} links have descriptive text`);
+
+  // 4.1.2 Name, Role, Value (A) - frames need a title
+  const frames = [...doc.querySelectorAll('iframe')].filter(f => !isHidden(f));
+  const untitledFrames = frames.filter(f => !(f.getAttribute('title') || '').trim() && !(f.getAttribute('aria-label') || '').trim());
+  add('frameTitles', '4.1.2', 'A', frames.length === 0 ? 'na' : untitledFrames.length ? 'fail' : 'pass',
+    frames.length === 0 ? 'No embedded frames (iframes)' :
+    untitledFrames.length ? `${untitledFrames.length} of ${frames.length} embedded frames (videos, maps, widgets) have no title` :
+    `All ${frames.length} embedded frames have a title`);
+
+  // 1.3.1 Info & Relationships (A) / 2.4.6 Headings and Labels (AA) - heading levels should not skip
+  const heads = [...doc.querySelectorAll('h1,h2,h3,h4,h5,h6')];
+  let skips = 0, emptyHeads = 0;
+  heads.forEach((h, i) => {
+    if (!h.textContent.trim() && !h.querySelector('img[alt]:not([alt=""])')) emptyHeads++;
+    if (i > 0) { const prev = +heads[i - 1].tagName[1], cur = +h.tagName[1]; if (cur > prev + 1) skips++; }
+  });
+  add('headingOrder', '1.3.1 · 2.4.6', 'A / AA', heads.length === 0 ? 'fail' : (skips || emptyHeads) ? 'warn' : 'pass',
+    heads.length === 0 ? 'No headings at all - content structure is not conveyed to screen readers' :
+    (skips || emptyHeads) ? [skips ? `${skips} place(s) where heading levels skip (e.g. H2 → H4)` : '', emptyHeads ? `${emptyHeads} empty heading(s)` : ''].filter(Boolean).join('; ') :
+    `${heads.length} headings in a logical order`);
+
+  // 1.4.4 Resize Text (AA) - zoom must not be disabled
+  const vp = doc.querySelector('meta[name="viewport"]');
+  const vpc = (vp?.getAttribute('content') || '').toLowerCase().replace(/\s+/g, '');
+  const maxScale = (vpc.match(/maximum-scale=([\d.]+)/) || [])[1];
+  const zoomBlocked = /user-scalable=(no|0)/.test(vpc) || (maxScale !== undefined && parseFloat(maxScale) < 2);
+  add('zoom', '1.4.4', 'AA', !vp ? 'na' : zoomBlocked ? 'fail' : 'pass',
+    !vp ? 'No viewport tag (see "Mobile viewport configured")' :
+    zoomBlocked ? `Pinch-zoom is disabled or limited (${vpc}) - users must be able to zoom to 200%` :
+    'Zoom is not blocked by the viewport tag');
+
+  // 2.4.3 Focus Order (A) - positive tabindex breaks the natural order
+  const posTab = [...doc.querySelectorAll('[tabindex]')].filter(e => parseInt(e.getAttribute('tabindex'), 10) > 0);
+  add('tabindex', '2.4.3', 'A', posTab.length ? 'warn' : 'pass',
+    posTab.length ? `${posTab.length} element(s) use a positive tabindex, which can scramble keyboard focus order` : 'No positive tabindex values found');
+
+  // 1.2.2 Captions (Prerecorded) (A)
+  const videos = [...doc.querySelectorAll('video')];
+  const uncaptioned = videos.filter(v => !v.querySelector('track[kind="captions"], track[kind="subtitles"]'));
+  const embeds = [...doc.querySelectorAll('iframe[src]')].filter(f => /youtube|youtu\.be|vimeo|wistia|loom/i.test(f.getAttribute('src')));
+  const capParts = [];
+  let capStatus = 'na';
+  if (uncaptioned.length) { capStatus = 'warn'; capParts.push(`${uncaptioned.length} of ${videos.length} <video> elements have no caption track`); }
+  else if (videos.length) { capStatus = 'pass'; capParts.push(`All ${videos.length} <video> elements include a caption track`); }
+  if (embeds.length) {
+    if (capStatus !== 'warn') capStatus = 'manual';
+    capParts.push(`${embeds.length} embedded video(s) (YouTube/Vimeo etc.) - verify captions are turned on and accurate`);
+  }
+  add('captions', '1.2.2', 'A', capStatus, capParts.length ? capParts.join('; ') : 'No video found in the page markup');
+
+  // 1.4.2 Audio Control / 2.2.2 Pause, Stop, Hide (A)
+  const autoplay = [...doc.querySelectorAll('video[autoplay], audio[autoplay]')];
+  const autoplaySound = autoplay.filter(m => !m.hasAttribute('muted'));
+  const moving = doc.querySelectorAll('marquee, blink').length;
+  add('motion', '1.4.2 · 2.2.2', 'A', (moving || autoplaySound.length) ? 'fail' : autoplay.length ? 'warn' : 'pass',
+    moving ? `${moving} <marquee>/<blink> element(s) - moving content that cannot be paused` :
+    autoplaySound.length ? `${autoplaySound.length} media element(s) autoplay with sound - users must be able to stop it` :
+    autoplay.length ? `${autoplay.length} muted autoplaying video(s) - make sure a pause control is available if it runs longer than 5 seconds` :
+    'No autoplaying media or moving marquee content found');
+
+  // 1.3.5 Identify Input Purpose (AA) - personal-info fields should declare autocomplete
+  const personal = fields.filter(el => {
+    const tp = (el.getAttribute('type') || '').toLowerCase();
+    const nm = ((el.getAttribute('name') || '') + ' ' + (el.getAttribute('id') || '')).toLowerCase();
+    return tp === 'email' || tp === 'tel' || /(^|[\s_-])(name|fname|lname|firstname|lastname|full_?name|email|e-mail|phone|tel|mobile|address|street|zip|postal|city)([\s_-]|$)/.test(nm);
+  });
+  const noAuto = personal.filter(el => !(el.getAttribute('autocomplete') || '').trim());
+  add('inputPurpose', '1.3.5', 'AA', personal.length === 0 ? 'na' : noAuto.length ? 'warn' : 'pass',
+    personal.length === 0 ? 'No name / email / phone / address fields found' :
+    noAuto.length ? `${noAuto.length} of ${personal.length} personal-info fields (name, email, phone, address) have no autocomplete attribute` :
+    `All ${personal.length} personal-info fields declare their purpose with autocomplete`);
+
+  // 2.1.1 Keyboard (A) - click handlers on elements a keyboard cannot reach
+  const clickOnly = [...doc.querySelectorAll('[onclick]')].filter(el =>
+    !/^(A|BUTTON|INPUT|SELECT|TEXTAREA|SUMMARY|LABEL|OPTION)$/.test(el.tagName) && !el.hasAttribute('tabindex') && !el.hasAttribute('role'));
+  add('keyboardAccess', '2.1.1', 'A', clickOnly.length ? 'warn' : 'pass',
+    clickOnly.length ? `${clickOnly.length} clickable element(s) (e.g. a <div onclick>) cannot be reached or used with the keyboard` :
+    'No mouse-only click targets found in the markup (script-attached handlers still need a manual keyboard test)');
+
+  // 2.2.1 Timing Adjustable (A) - timed auto refresh / redirect
+  const refresh = doc.querySelector('meta[http-equiv="refresh" i]');
+  const refreshDelay = refresh ? parseFloat((refresh.getAttribute('content') || '').split(/[;,]/)[0]) : NaN;
+  add('timing', '2.2.1', 'A', (refresh && refreshDelay > 0) ? 'fail' : 'pass',
+    (refresh && refreshDelay > 0) ? `Page auto-refreshes or redirects after ${refreshDelay} seconds with no way to stop it` :
+    'No timed auto-refresh or redirect found');
+
+  // 2.5.3 Label in Name (A) - visible text must be part of the accessible name
+  const labelled = [...doc.querySelectorAll('a[aria-label], button[aria-label], [role="button"][aria-label], [role="link"][aria-label]')].filter(el => (el.textContent || '').replace(/\s+/g, ' ').trim());
+  const mismatch = labelled.filter(el => {
+    const vis = el.textContent.replace(/\s+/g, ' ').trim().toLowerCase();
+    return !el.getAttribute('aria-label').toLowerCase().includes(vis);
+  });
+  add('labelInName', '2.5.3', 'A', labelled.length === 0 ? 'na' : mismatch.length ? 'warn' : 'pass',
+    labelled.length === 0 ? 'No visible-text controls with an aria-label to compare' :
+    mismatch.length ? `${mismatch.length} of ${labelled.length} controls have an aria-label that does not include their visible text (voice-control users cannot activate them by name)` :
+    `All ${labelled.length} labelled controls include their visible text in the accessible name`);
+
+  // Info used by the full checklist (3.3.8 Accessible Authentication)
+  const captcha = /recaptcha|hcaptcha|turnstile|captcha/i.test(html);
+  add('captchaInfo', '3.3.8', 'AA', 'manual',
+    captcha ? 'A CAPTCHA was detected - confirm there is an accessible alternative (no puzzle-only or memory test)' :
+    'No CAPTCHA detected on this page - check any login pages manually');
+
+  // WCAG 2.2 additions + visual criteria that need a human
+  add('wcag22', '2.4.11 · 2.5.7 · 2.5.8 · 3.2.6 · 3.3.7 · 3.3.8', 'A / AA', 'manual',
+    'New in WCAG 2.2: focus not hidden by sticky headers, drag alternatives, 24×24px tap targets, consistent help location, no re-entering info, accessible login (no puzzle-only CAPTCHA)');
+  return out;
+}
+
+// WCAG success criteria each ORIGINAL scored check relates to (labels only).
+const WCAG_REF = {
+  https: '', privacyLink: '', privacyDetails: '', consent: '',
+  accessibilityLink: 'WCAG statement',
+  lang: 'WCAG 3.1.1 · A',
+  viewport: 'WCAG 1.4.10 · AA',
+  headings: 'WCAG 1.3.1 · A',
+  images: 'WCAG 1.1.1 · A',
+  forms: 'WCAG 1.3.1 / 3.3.2 · A',
+  landmarks: 'WCAG 1.3.1 · A',
+  skipLink: 'WCAG 2.4.1 · A',
+  keyboard: 'WCAG 2.1.1 / 2.4.3 / 2.4.7 · A/AA',
+  screenReader: 'WCAG 4.1.2 · A',
+  contrast: 'WCAG 1.4.3 / 1.4.4 / 1.4.10 · AA'
+};
+
+// ========== FULL WCAG 2.2 LEVEL A + AA CHECKLIST (55 success criteria) ==========
+// Every A and AA success criterion is listed so nothing is silently left
+// out of the report. "auto" names the automated checks that test it; the
+// worst automated result wins. Criteria no automated scan can judge are
+// shown as "Manual review required" - never as a pass.
+// 4.1.1 Parsing is not listed: W3C removed it in WCAG 2.2.
+const WCAG_ALL = [
+  ['1.1.1','Non-text Content','A',['orig:images','nonText']],
+  ['1.2.1','Audio-only and Video-only (Prerecorded)','A',[]],
+  ['1.2.2','Captions (Prerecorded)','A',['captions']],
+  ['1.2.3','Audio Description or Media Alternative (Prerecorded)','A',[]],
+  ['1.2.4','Captions (Live)','AA',[]],
+  ['1.2.5','Audio Description (Prerecorded)','AA',[]],
+  ['1.3.1','Info and Relationships','A',['fieldLabels','headingOrder','orig:landmarks']],
+  ['1.3.2','Meaningful Sequence','A',[]],
+  ['1.3.3','Sensory Characteristics','A',[]],
+  ['1.3.4','Orientation','AA',[]],
+  ['1.3.5','Identify Input Purpose','AA',['inputPurpose']],
+  ['1.4.1','Use of Color','A',[]],
+  ['1.4.2','Audio Control','A',['motion']],
+  ['1.4.3','Contrast (Minimum)','AA',[]],
+  ['1.4.4','Resize Text','AA',['zoom']],
+  ['1.4.5','Images of Text','AA',[]],
+  ['1.4.10','Reflow','AA',[]],
+  ['1.4.11','Non-text Contrast','AA',[]],
+  ['1.4.12','Text Spacing','AA',[]],
+  ['1.4.13','Content on Hover or Focus','AA',[]],
+  ['2.1.1','Keyboard','A',['keyboardAccess']],
+  ['2.1.2','No Keyboard Trap','A',[]],
+  ['2.1.4','Character Key Shortcuts','A',[]],
+  ['2.2.1','Timing Adjustable','A',['timing']],
+  ['2.2.2','Pause, Stop, Hide','A',['motion']],
+  ['2.3.1','Three Flashes or Below Threshold','A',[]],
+  ['2.4.1','Bypass Blocks','A',['bypass']],
+  ['2.4.2','Page Titled','A',['pageTitle']],
+  ['2.4.3','Focus Order','A',['tabindex']],
+  ['2.4.4','Link Purpose (In Context)','A',['linkPurpose']],
+  ['2.4.5','Multiple Ways','AA',[]],
+  ['2.4.6','Headings and Labels','AA',['headingOrder']],
+  ['2.4.7','Focus Visible','AA',[]],
+  ['2.4.11','Focus Not Obscured (Minimum) - new in 2.2','AA',[]],
+  ['2.5.1','Pointer Gestures','A',[]],
+  ['2.5.2','Pointer Cancellation','A',[]],
+  ['2.5.3','Label in Name','A',['labelInName']],
+  ['2.5.4','Motion Actuation','A',[]],
+  ['2.5.7','Dragging Movements - new in 2.2','AA',[]],
+  ['2.5.8','Target Size (Minimum) - new in 2.2','AA',[]],
+  ['3.1.1','Language of Page','A',['orig:lang']],
+  ['3.1.2','Language of Parts','AA',[]],
+  ['3.2.1','On Focus','A',[]],
+  ['3.2.2','On Input','A',[]],
+  ['3.2.3','Consistent Navigation','AA',[]],
+  ['3.2.4','Consistent Identification','AA',[]],
+  ['3.2.6','Consistent Help - new in 2.2','A',[]],
+  ['3.3.1','Error Identification','A',[]],
+  ['3.3.2','Labels or Instructions','A',['fieldLabels']],
+  ['3.3.3','Error Suggestion','AA',[]],
+  ['3.3.4','Error Prevention (Legal, Financial, Data)','AA',[]],
+  ['3.3.7','Redundant Entry - new in 2.2','A',[]],
+  ['3.3.8','Accessible Authentication (Minimum) - new in 2.2','AA',['captchaInfo']],
+  ['4.1.2','Name, Role, Value','A',['buttonNames','frameTitles','fieldLabels']],
+  ['4.1.3','Status Messages','AA',[]]
+];
+function buildWcagChecklist(data) {
+  const orig = {}; (data.checks || []).forEach(c => { orig[c.id] = { status: c.status, evidence: c.evidenceValues?.details || '' }; });
+  const auto = {}; (data.wcag || []).forEach(c => { auto[c.id] = { status: c.status, evidence: c.evidence }; });
+  // 2.4.1 Bypass Blocks is met by a skip link OR by landmark regions.
+  const skip = orig.skipLink, land = orig.landmarks;
+  if (skip || land) {
+    auto.bypass = skip && skip.status === 'pass' ? { status: 'pass', evidence: 'Skip-navigation link found' }
+      : land && land.status === 'pass' ? { status: 'warn', evidence: 'Main landmark found but no skip link - add a "Skip to content" link' }
+      : { status: 'fail', evidence: 'No skip link and no main landmark - keyboard users must tab through every menu item' };
+  }
+  const rank = { fail: 4, warn: 3, pass: 2, manual: 1, na: 0 };
+  return WCAG_ALL.map(([sc, name, level, ids]) => {
+    const found = ids.map(id => id.startsWith('orig:') ? orig[id.slice(5)] : auto[id]).filter(Boolean);
+    // Original "images" check reports "No images found" as warn - treat that as nothing to test.
+    const usable = found.map(f => (f.evidence === 'No images found to check') ? { status: 'na', evidence: f.evidence } : f);
+    if (!usable.length) return { sc, name, level, status: 'manual', evidence: '' };
+    let worst = usable[0];
+    usable.forEach(f => { if (rank[f.status] > rank[worst.status]) worst = f; });
+    const evidence = usable.filter(f => f.status === worst.status).map(f => f.evidence).filter(Boolean).join(' · ');
+    return { sc, name, level, status: worst.status, evidence };
+  });
+}
+function checklistStatusLabel(s) { return s === 'manual' ? t('wcagManualShort') : s === 'na' ? t('wcagNaShort') : wcagStatusLabel(s); }
+function checklistSummary(list) {
+  const n = s => list.filter(c => c.status === s).length;
+  return lang === 'es'
+    ? `${list.length} criterios: ${n('pass')} cumplen · ${n('fail')} con problemas · ${n('warn')} requieren revisión · ${n('manual')} revisión manual · ${n('na')} sin contenido que evaluar`
+    : `${list.length} criteria: ${n('pass')} meet · ${n('fail')} issue(s) found · ${n('warn')} need review · ${n('manual')} manual review required · ${n('na')} nothing on the page to test`;
+}
+function checklistTableHtml(list) {
+  return `<table class="wcag-table"><thead><tr><th>${escapeHtml(t('colCriterion'))}</th><th>${escapeHtml(t('colResult'))}</th><th>${escapeHtml(t('colLevel'))}</th></tr></thead><tbody>` +
+    list.map(c => `<tr><td class="sc">${escapeHtml(c.sc)}<span class="ev" style="color:#1f3c54;font-weight:600">${escapeHtml(c.name)}</span></td><td><span class="st ${c.status}">${escapeHtml(checklistStatusLabel(c.status))}</span>${c.evidence ? `<span class="ev">${escapeHtml(c.evidence)}</span>` : ''}</td><td>${escapeHtml(c.level)}</td></tr>`).join('') +
+    `</tbody></table>`;
+}
+
 // ========== WEIGHTED SCORING ==========
 // Compliance signals (privacy, consent, accessibility) carry 4x the weight
 // of technical hygiene signals (lang, viewport, headings, etc). On top of
@@ -655,20 +1005,120 @@ function explainScore(results, score) {
     ? `Puntuación ponderada: cumplimiento vale 4x, higiene técnica vale 1x`
     : `Weighted score: compliance counts 4x, technical hygiene counts 1x`;
 }
+function wcagSummary(wcag) {
+  if (!wcag || !wcag.length) return '';
+  const f = wcag.filter(c => c.status === 'fail').length;
+  const w = wcag.filter(c => c.status === 'warn').length;
+  const m = wcag.filter(c => c.status === 'manual').length;
+  return lang === 'es'
+    ? `WCAG 2.2 A/AA: ${f} problema(s), ${w} advertencia(s), ${m} para revisión manual (no afecta la puntuación)`
+    : `WCAG 2.2 A/AA checkpoints: ${f} issue(s), ${w} warning(s), ${m} for manual review (does not affect the score)`;
+}
 function jsRenderedNote() {
   return lang === 'es'
     ? '⚠ Este sitio parece renderizar su contenido con JavaScript. Este análisis solo lee el HTML inicial, así que avisos de cookies, widgets de accesibilidad u otro contenido inyectado por JavaScript pueden no ser visibles en este escaneo. Se recomienda verificación manual.'
     : "⚠ This site appears to render its content with JavaScript. This scan reads only the initial HTML, so cookie banners, accessibility widgets, or other JavaScript-injected content may not be visible here. Manual verification is recommended before relying on this score.";
 }
 const copy = {
-  en:{insights:'Digital Insights',subtitle:'Website accessibility · Privacy · Consent',language:'Language',googleTitle:'Google Updates',googleText:'Track confirmed Google search changes and expert analysis.',visitHub:'Visit hub',adaTitle:'ADA Resource',adaText:'Official U.S. Department of Justice web accessibility guidance.',readGuide:'Read the guidance',tagline:'Your Path to a Stronger Online Presence',checkerTitle:'Website Compliance Checker',checkerIntro:'Enter a website address. We inspect available live website evidence; we do not guess from the URL.',websiteLabel:'Website address',analyze:'Analyze',auditNotice:'Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.',report:'Website Screening Report',requestTitle:'Would you like help with the findings?',name:'Full name',phone:'Phone number',email:'Email address',business:'Business name',website:'Website',service:'Service needed',chooseService:'Choose a service',fullAnalysis:'Full Website Analysis',audit:'Compliance Audit',demo:'Complimentary Website Demo',phoneApp:'Custom Phone Application',receptionist:'Virtual Receptionist',social:'Social Media Marketing',advertising:'Online Advertising',other:'Other',message:'How can we help?',consent:'I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.',sendRequest:'Request Help',reportReady:'Your professional report is ready.',printReport:'Print Report',downloadPdf:'Download PDF',stateTitle:'Jurisdiction Information',stateIntro:'Select the state where your business operates to see specific compliance requirements, penalties, and official resources.',viewInfo:'View information',packages:'View Website Packages',privacy:'Privacy Policy',selectPlace:'Choose a state',checking:'Inspecting the live website…',unable:'Unable to verify this website right now. No score was generated - please try again in a moment, or double-check the address.',score:'Automated evidence score',screened:'Screened',manualReview:'Manual review still required',pass:'Evidence found',warn:'Partial evidence',fail:'Not detected',manual:'Manual test required',formSent:'Thank you. Your request was received.',formError:'The request could not be submitted. Please try again.',selectFirst:'Please select a location.',invalidDomain:'Enter a valid website address (e.g., https://www.business.com)'},
-  es:{insights:'Información Digital',subtitle:'Accesibilidad web · Privacidad · Consentimiento',language:'Idioma',googleTitle:'Actualizaciones de Google',googleText:'Consulta cambios confirmados de Google y análisis de expertos.',visitHub:'Visitar el centro',adaTitle:'Recurso sobre la ADA',adaText:'Guía oficial del Departamento de Justicia de EE. UU. sobre accesibilidad web.',readGuide:'Leer la guía',tagline:'Tu camino hacia una presencia digital más sólida',checkerTitle:'Verificador de Cumplimiento Web',checkerIntro:'Ingresa la dirección de un sitio web. Inspeccionamos evidencia disponible en el sitio; no adivinamos usando la URL.',websiteLabel:'Dirección del sitio web',analyze:'Analizar',auditNotice:'Los resultados automatizados son una evaluación basada en evidencia, no una certificación legal. Aún puede ser necesaria una revisión manual de accesibilidad y una revisión legal.',report:'Informe de Evaluación del Sitio Web',requestTitle:'¿Deseas ayuda con los resultados?',name:'Nombre completo',phone:'Número de teléfono',email:'Correo electrónico',business:'Nombre del negocio',website:'Sitio web',service:'Servicio solicitado',chooseService:'Elige un servicio',fullAnalysis:'Análisis Completo del Sitio Web',audit:'Auditoría de Cumplimiento',demo:'Demostración Gratuita del Sitio Web',phoneApp:'Aplicación Telefónica Personalizada',receptionist:'Recepcionista Virtual',social:'Marketing en Redes Sociales',advertising:'Publicidad en Línea',other:'Otro',message:'¿Cómo podemos ayudarte?',consent:'Acepto que The WebSwan use esta información para responder a mi solicitud. Consulta nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>.',sendRequest:'Solicitar Ayuda',reportReady:'Tu informe profesional está listo.',printReport:'Imprimir Informe',downloadPdf:'Descargar PDF',stateTitle:'Información por Jurisdicción',stateIntro:'Selecciona la ubicación aplicable a tu negocio para consultar recursos oficiales de privacidad y accesibilidad.',viewInfo:'Ver información',packages:'Ver Paquetes de Sitios Web',privacy:'Política de Privacidad',selectPlace:'Elige una ubicación',checking:'Inspeccionando el sitio web en vivo…',unable:'No se pudo verificar este sitio web en este momento. No se generó ninguna puntuación - inténtalo de nuevo en un momento o revisa la dirección.',score:'Puntuación automatizada de evidencia',screened:'Evaluado',manualReview:'Aún se requiere revisión manual',pass:'Evidencia encontrada',warn:'Evidencia parcial',fail:'No detectado',manual:'Prueba manual requerida',formSent:'Gracias. Recibimos tu solicitud.',formError:'No se pudo enviar la solicitud. Inténtalo nuevamente.',selectFirst:'Selecciona una ubicación.',invalidDomain:'Ingresa una dirección de sitio web válida (ej: https://www.negocio.com)'}
+  en:{insights:'Digital Insights',subtitle:'Website accessibility · Privacy · Consent',language:'Language',googleTitle:'Google Updates',googleText:'Track confirmed Google search changes and expert analysis.',visitHub:'Visit hub',adaTitle:'ADA Resource',adaText:'Official U.S. Department of Justice web accessibility guidance.',readGuide:'Read the guidance',tagline:'Your Path to a Stronger Online Presence',checkerTitle:'Website Compliance Checker',checkerIntro:'Enter a website address. We inspect available live website evidence; we do not guess from the URL.',websiteLabel:'Website address',analyze:'Analyze',auditNotice:'Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.',report:'Website Screening Report',requestTitle:'Would you like help with the findings?',name:'Full name',phone:'Phone number',email:'Email address',business:'Business name',website:'Website',service:'Service needed',chooseService:'Choose a service',fullAnalysis:'Full Website Analysis',audit:'Compliance Audit',demo:'Complimentary Website Demo',phoneApp:'Custom Phone Application',receptionist:'Virtual Receptionist',social:'Social Media Marketing',advertising:'Online Advertising',other:'Other',message:'How can we help?',consent:'I agree that The WebSwan may use this information to respond to my request. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.',sendRequest:'Request Help',reportReady:'Your professional report is ready.',printReport:'Print Report',downloadPdf:'Download PDF',stateTitle:'Jurisdiction Information',stateIntro:'Select the state where your business operates to see specific compliance requirements, penalties, and official resources.',viewInfo:'View information',packages:'View Website Packages',privacy:'Privacy Policy',selectPlace:'Choose a state',checking:'Inspecting the live website…',unable:'Unable to verify this website right now. No score was generated - please try again in a moment, or double-check the address.',score:'Automated evidence score',screened:'Screened',manualReview:'Manual review still required',pass:'Evidence found',warn:'Partial evidence',fail:'Not detected',manual:'Manual test required',na:'Nothing to test',formSent:'Thank you. Your request was received.',formError:'The request could not be submitted. Please try again.',selectFirst:'Please select a location.',invalidDomain:'Enter a valid website address (e.g., https://www.business.com)',wcagTitle:'WCAG 2.2 Level A / AA checkpoints',wcagSub:'Each item is tied to its WCAG success criterion. These findings are shown for detail and do not change the score above.',wcagPass:'Meets',wcagFail:'Issue found',wcagWarn:'Needs review',wcagFullTitle:'Full WCAG 2.2 Level A & AA checklist - all 55 success criteria',wcagManualShort:'Manual review required',wcagNaShort:'Nothing on the page to test',colCriterion:'Criterion',colLevel:'Level',colResult:'Result'},
+  es:{insights:'Información Digital',subtitle:'Accesibilidad web · Privacidad · Consentimiento',language:'Idioma',googleTitle:'Actualizaciones de Google',googleText:'Consulta cambios confirmados de Google y análisis de expertos.',visitHub:'Visitar el centro',adaTitle:'Recurso sobre la ADA',adaText:'Guía oficial del Departamento de Justicia de EE. UU. sobre accesibilidad web.',readGuide:'Leer la guía',tagline:'Tu camino hacia una presencia digital más sólida',checkerTitle:'Verificador de Cumplimiento Web',checkerIntro:'Ingresa la dirección de un sitio web. Inspeccionamos evidencia disponible en el sitio; no adivinamos usando la URL.',websiteLabel:'Dirección del sitio web',analyze:'Analizar',auditNotice:'Los resultados automatizados son una evaluación basada en evidencia, no una certificación legal. Aún puede ser necesaria una revisión manual de accesibilidad y una revisión legal.',report:'Informe de Evaluación del Sitio Web',requestTitle:'¿Deseas ayuda con los resultados?',name:'Nombre completo',phone:'Número de teléfono',email:'Correo electrónico',business:'Nombre del negocio',website:'Sitio web',service:'Servicio solicitado',chooseService:'Elige un servicio',fullAnalysis:'Análisis Completo del Sitio Web',audit:'Auditoría de Cumplimiento',demo:'Demostración Gratuita del Sitio Web',phoneApp:'Aplicación Telefónica Personalizada',receptionist:'Recepcionista Virtual',social:'Marketing en Redes Sociales',advertising:'Publicidad en Línea',other:'Otro',message:'¿Cómo podemos ayudarte?',consent:'Acepto que The WebSwan use esta información para responder a mi solicitud. Consulta nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>.',sendRequest:'Solicitar Ayuda',reportReady:'Tu informe profesional está listo.',printReport:'Imprimir Informe',downloadPdf:'Descargar PDF',stateTitle:'Información por Jurisdicción',stateIntro:'Selecciona la ubicación aplicable a tu negocio para consultar recursos oficiales de privacidad y accesibilidad.',viewInfo:'Ver información',packages:'Ver Paquetes de Sitios Web',privacy:'Política de Privacidad',selectPlace:'Elige una ubicación',checking:'Inspeccionando el sitio web en vivo…',unable:'No se pudo verificar este sitio web en este momento. No se generó ninguna puntuación - inténtalo de nuevo en un momento o revisa la dirección.',score:'Puntuación automatizada de evidencia',screened:'Evaluado',manualReview:'Aún se requiere revisión manual',pass:'Evidencia encontrada',warn:'Evidencia parcial',fail:'No detectado',manual:'Prueba manual requerida',na:'Nada que evaluar',formSent:'Gracias. Recibimos tu solicitud.',formError:'No se pudo enviar la solicitud. Inténtalo nuevamente.',selectFirst:'Selecciona una ubicación.',invalidDomain:'Ingresa una dirección de sitio web válida (ej: https://www.negocio.com)',wcagTitle:'Puntos de control WCAG 2.2 Nivel A / AA',wcagSub:'Cada punto está vinculado a su criterio de éxito WCAG. Se muestran como detalle y no cambian la puntuación.',wcagPass:'Cumple',wcagFail:'Problema encontrado',wcagWarn:'Requiere revisión',wcagFullTitle:'Lista completa WCAG 2.2 Nivel A y AA - los 55 criterios',wcagManualShort:'Requiere revisión manual',wcagNaShort:'Nada que evaluar en la página',colCriterion:'Criterio',colLevel:'Nivel',colResult:'Resultado'}
 };
 const checkText={
   en:{https:'Secure HTTPS connection',privacyLink:'Privacy policy or privacy notice',privacyDetails:'Data-use and rights disclosures',consent:'Cookie or consent controls',accessibilityLink:'Accessibility information or statement',lang:'Page language declared',viewport:'Mobile viewport configured',headings:'Page heading structure',images:'Image alternative text',forms:'Form labels',landmarks:'Main content landmark',skipLink:'Skip-navigation link',keyboard:'Keyboard navigation, focus order and visible focus',screenReader:'Screen-reader behavior',contrast:'Color contrast, zoom and reflow'},
   es:{https:'Conexión HTTPS segura',privacyLink:'Política o aviso de privacidad',privacyDetails:'Divulgaciones sobre uso de datos y derechos',consent:'Controles de cookies o consentimiento',accessibilityLink:'Información o declaración de accesibilidad',lang:'Idioma de la página declarado',viewport:'Configuración móvil viewport',headings:'Estructura de encabezados',images:'Texto alternativo de imágenes',forms:'Etiquetas de formularios',landmarks:'Región principal del contenido',skipLink:'Enlace para saltar la navegación',keyboard:'Navegación por teclado, orden y foco visible',screenReader:'Funcionamiento con lector de pantalla',contrast:'Contraste de color, zoom y reajuste de contenido'}
 };
-const places = ['California','New York','Texas','Georgia','Florida','Utah','Arizona','Illinois','North Carolina','Nevada'];
+const wcagText={
+  en:{pageTitle:'Page titled',nonText:'Text alternatives for image buttons, image maps & graphics',fieldLabels:'Every form field has a label',buttonNames:'Buttons have an accessible name',linkPurpose:'Link purpose is clear',frameTitles:'Embedded frames have titles',headingOrder:'Headings are in logical order',zoom:'Text can be zoomed to 200%',tabindex:'Keyboard focus order',captions:'Captions for video',motion:'Autoplay audio & moving content can be stopped',wcag22:'WCAG 2.2 new criteria (manual)',inputPurpose:'Personal-info fields declare their purpose',keyboardAccess:'Clickable items work with a keyboard',timing:'No timed auto-refresh / redirect',labelInName:'Visible label matches accessible name',captchaInfo:'Accessible login / CAPTCHA'},
+  es:{pageTitle:'Página con título',nonText:'Alternativas de texto para botones de imagen, mapas e imágenes',fieldLabels:'Cada campo del formulario tiene etiqueta',buttonNames:'Los botones tienen nombre accesible',linkPurpose:'El propósito de los enlaces es claro',frameTitles:'Los marcos incrustados tienen título',headingOrder:'Encabezados en orden lógico',zoom:'El texto se puede ampliar al 200%',tabindex:'Orden del foco del teclado',captions:'Subtítulos en videos',motion:'Audio automático y contenido en movimiento se pueden detener',wcag22:'Nuevos criterios WCAG 2.2 (manual)',inputPurpose:'Campos personales declaran su propósito',keyboardAccess:'Elementos clicables funcionan con teclado',timing:'Sin actualización o redirección automática',labelInName:'La etiqueta visible coincide con el nombre accesible',captchaInfo:'Inicio de sesión / CAPTCHA accesible'}
+};
+
+// ========== JURISDICTION DATA (all 50 states + DC) ==========
+// Researched September 2026. Figures are maximum civil penalties the state
+// Attorney General can seek per violation; most comprehensive privacy laws
+// only apply to businesses above a size threshold (e.g. number of state
+// residents whose data they process). Re-check annually - these change.
+const places = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+// [law, effective date, max penalty]
+const PRIVACY_LAWS = {
+  'California':['California Consumer Privacy Act as amended by the CPRA (CCPA/CPRA)','In effect since Jan 1, 2020','Up to $2,663 per violation; up to $7,988 per intentional violation or violation involving minors under 16'],
+  'Virginia':['Virginia Consumer Data Protection Act (VCDPA)','In effect since Jan 1, 2023','Up to $7,500 per violation'],
+  'Colorado':['Colorado Privacy Act (CPA)','In effect since Jul 1, 2023','Up to $20,000 per violation'],
+  'Connecticut':['Connecticut Data Privacy Act (CTDPA), amended 2026','In effect since Jul 1, 2023','Up to $5,000 per willful violation'],
+  'Utah':['Utah Consumer Privacy Act (UCPA)','In effect since Dec 31, 2023','Up to $7,500 per violation'],
+  'Texas':['Texas Data Privacy and Security Act (TDPSA)','In effect since Jul 1, 2024','Up to $7,500 per violation'],
+  'Oregon':['Oregon Consumer Privacy Act (OCPA)','In effect since Jul 1, 2024','Up to $7,500 per violation'],
+  'Florida':['Florida Digital Bill of Rights (full law applies mainly to companies with $1B+ revenue; sensitive-data rules apply more broadly)','In effect since Jul 1, 2024','Up to $50,000 per violation'],
+  'Montana':['Montana Consumer Data Privacy Act (MCDPA)','In effect since Oct 1, 2024','Up to $7,500 per violation'],
+  'Delaware':['Delaware Personal Data Privacy Act (DPDPA)','In effect since Jan 1, 2025','Up to $10,000 per violation'],
+  'Iowa':['Iowa Consumer Data Protection Act (ICDPA)','In effect since Jan 1, 2025','Up to $7,500 per violation'],
+  'Nebraska':['Nebraska Data Privacy Act (NDPA)','In effect since Jan 1, 2025','Up to $7,500 per violation'],
+  'New Hampshire':['New Hampshire Data Privacy Act','In effect since Jan 1, 2025','Up to $10,000 per violation'],
+  'New Jersey':['New Jersey Data Privacy Act (NJDPA)','In effect since Jan 15, 2025','Up to $10,000 for a first violation; up to $20,000 for later violations'],
+  'Tennessee':['Tennessee Information Protection Act (TIPA)','In effect since Jul 1, 2025','Up to $7,500 per violation; up to $22,500 if willful'],
+  'Minnesota':['Minnesota Consumer Data Privacy Act (MCDPA)','In effect since Jul 31, 2025','Up to $7,500 per violation'],
+  'Maryland':['Maryland Online Data Privacy Act (MODPA)','In effect since Oct 1, 2025','Up to $10,000 per violation; up to $25,000 for repeat violations'],
+  'Indiana':['Indiana Consumer Data Protection Act (INCDPA)','In effect since Jan 1, 2026','Up to $7,500 per violation'],
+  'Kentucky':['Kentucky Consumer Data Protection Act (KCDPA)','In effect since Jan 1, 2026','Up to $7,500 per violation'],
+  'Rhode Island':['Rhode Island Data Transparency and Privacy Protection Act','In effect since Jan 1, 2026','Up to $10,000 per violation'],
+  'Oklahoma':['Oklahoma consumer data privacy law (signed 2026)','Takes effect Jan 1, 2027','Up to $7,500 per violation'],
+  'Louisiana':['Louisiana Data Privacy Act (signed 2026)','Takes effect Jan 1, 2027','Penalties under the Louisiana Unfair Trade Practices and Consumer Protection Law'],
+  'Alabama':['Alabama consumer data privacy law (signed 2026)','Takes effect May 1, 2027','Up to $15,000 per violation'],
+  'Vermont':['Vermont Data Privacy and Online Surveillance Act (signed 2026)','Takes effect Jan 1, 2028','Penalties under the Vermont Consumer Protection Act']
+};
+// Extra state laws that matter for doctors, attorneys and small businesses.
+const STATE_EXTRAS = {
+  'California':['Unruh Civil Rights Act: minimum $4,000 in statutory damages per violation. California is one of the top states for website-accessibility lawsuits.','CalOPPA: any commercial website that collects personal information from Californians must post a privacy policy.','Medical practices: the Confidentiality of Medical Information Act (CMIA) adds state protections on top of HIPAA.'],
+  'New York':['SHIELD Act: reasonable data-security safeguards required; breached New York residents must be notified within 30 days; up to $5,000 per violation for failing to keep reasonable safeguards.','New York is one of the top states for website-accessibility lawsuits, and the New York State and City Human Rights Laws allow damages on top of the ADA.'],
+  'Florida':['Florida is one of the top states for website-accessibility (ADA Title III) lawsuits.'],
+  'Illinois':['Biometric Information Privacy Act (BIPA): written consent required before collecting fingerprints, face scans, etc. Private lawsuits allowed: $1,000 per negligent violation, $5,000 per intentional or reckless violation.'],
+  'Washington':['My Health My Data Act: strict consent rules for consumer health data (including on websites and apps). Individuals can sue under the state Consumer Protection Act.'],
+  'Nevada':['NRS 603A: website operators must post a privacy notice and honor opt-out-of-sale requests; up to $5,000 per violation.','Nevada also has a consumer health data law (SB 370) with consent rules for health data.']
+};
+// Original official links, kept.
+const STATE_LINKS = {
+  'California':[{ text: 'CA DOJ - CCPA', url: 'https://oag.ca.gov/privacy/ccpa' }],
+  'New York':[{ text: 'NY AG - Data Breach', url: 'https://ag.ny.gov/resources/organizations/data-breach-reporting' }],
+  'Texas':[{ text: 'TX AG - Consumer Protection', url: 'https://www.texasattorneygeneral.gov/consumer-protection' }],
+  'Georgia':[{ text: 'GA AG - Consumer Protection', url: 'https://law.georgia.gov/consumer-protection' }],
+  'Florida':[{ text: 'FL AG - Consumer Protection', url: 'https://www.myfloridalegal.com/consumer-protection' }],
+  'Utah':[{ text: 'UT AG - Consumer Protection', url: 'https://attorneygeneral.utah.gov/consumer-protection/' }],
+  'Arizona':[{ text: 'AZ AG - Consumer Protection', url: 'https://www.azag.gov/consumer' }],
+  'Illinois':[{ text: 'IL AG - Privacy', url: 'https://illinoisattorneygeneral.gov/consumers/identitytheft/' }],
+  'North Carolina':[{ text: 'NC AG - Consumer Protection', url: 'https://ncdoj.gov/consumer/' }],
+  'Nevada':[{ text: 'NV AG - Privacy', url: 'https://ag.nv.gov/Privacy/' }]
+};
+const FEDERAL_LINKS = [
+  { text: 'ADA.gov - Web Guidance', url: 'https://www.ada.gov/resources/web-guidance/' },
+  { text: 'W3C - WCAG 2.2 Quick Reference', url: 'https://www.w3.org/WAI/WCAG22/quickref/' }
+];
+function buildStateInfo(p) {
+  const law = PRIVACY_LAWS[p];
+  const upcoming = law && /^Takes effect/.test(law[1]);
+  const reqs = [];
+  const pens = [];
+  if (law && !upcoming) {
+    reqs.push(`Comprehensive privacy law: <strong>${law[0]}</strong> (${law[1]}). Businesses it covers must post a privacy notice, honor consumer rights (access, correction, deletion, opt-out of targeted ads / sale of data) and get opt-in consent before processing sensitive data such as health information.`);
+    reqs.push('Most of these laws only apply above a size threshold (for example, data on tens of thousands of state residents). Small practices may fall below it, but HIPAA, the ADA and breach laws still apply.');
+    pens.push(`<strong>Privacy violations:</strong> ${law[2]}`);
+  } else if (law && upcoming) {
+    reqs.push(`No comprehensive privacy law in effect yet. <strong>${law[0]}</strong> - ${law[1]}. Now is the time to prepare the privacy notice and consumer-rights process.`);
+    pens.push(`<strong>Privacy violations (once in effect):</strong> ${law[2]}`);
+  } else {
+    reqs.push('No comprehensive consumer privacy law in effect as of September 2026. The state\'s consumer-protection (unfair / deceptive practices) law still applies, so a website\'s privacy statements must be accurate.');
+    pens.push('<strong>Privacy violations:</strong> Enforced under the state\'s consumer-protection and data-breach laws; amounts vary.');
+  }
+  reqs.push('Data breach notification law: every state and DC requires notice to affected residents after a breach of personal information.');
+  (STATE_EXTRAS[p] || []).forEach(x => reqs.push(x));
+  pens.unshift('<strong>ADA Title III (federal, all states):</strong> In a U.S. DOJ enforcement action, civil penalties up to $118,225 for a first violation and $236,451 for a later violation. Private lawsuits seek a court order to fix the website plus the plaintiff\'s attorney\'s fees.');
+  return { reqs, pens, links: (STATE_LINKS[p] || []).concat(FEDERAL_LINKS) };
+}
+const FEDERAL_HTML = `<div class="fed"><strong><i class="fa-solid fa-landmark"></i> Federal rules that apply in every state</strong><ul>
+  <li><strong>ADA Title III</strong> covers businesses open to the public, including medical offices and law firms. The DOJ says websites must be accessible; courts and settlements commonly use <strong>WCAG 2.1 Level AA</strong> as the benchmark. <strong>WCAG 2.2</strong> is the current W3C version.</li>
+  <li><strong>HHS Section 504 rule:</strong> health providers that receive HHS federal financial assistance (for example Medicaid) must meet WCAG 2.1 AA: 15+ employees by May 11, 2026 (now in force); fewer than 15 employees by May 10, 2027.</li>
+  <li><strong>ADA Title II</strong> (state and local government sites): WCAG 2.1 AA by April 26, 2027 (population 50,000+) or April 26, 2028 (smaller entities), after the DOJ's 2026 extension.</li>
+  <li><strong>HIPAA</strong> (medical practices): website forms that collect patient health information need secure transmission and a Business Associate Agreement with the form/hosting vendor; tracking pixels on patient pages can expose health data.</li>
+</ul></div>`;
+
 let lang='en';
 const t=k=>copy[lang][k]||k;
 function applyLanguage(){
@@ -723,6 +1173,10 @@ async function runAudit(){
   result.classList.add('show');
   document.getElementById('summary').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${t('checking')}`;
   document.getElementById('checks').innerHTML='';
+  document.getElementById('wcagChecks').innerHTML='';
+  document.getElementById('wcagFullTable').innerHTML='';
+  document.getElementById('wcagFullSummary').textContent='';
+  document.getElementById('wcagBlock').classList.remove('show');
   document.getElementById('requestSection').classList.remove('show');
   document.getElementById('reportActionsTop').classList.remove('show');
   window.lastAudit = null;
@@ -737,7 +1191,7 @@ async function runAudit(){
   secretTrigger.innerHTML = 'Your professional report is ready. <span style="font-size:0.7rem;opacity:0.5;">🔑</span>';
 
   try{
-    const { checks: scanResults, looksJsRendered } = await scanWebsite(url);
+    const { checks: scanResults, looksJsRendered, wcag } = await scanWebsite(url);
     const hostname = new URL(url).hostname;
     const checks = Object.entries(scanResults).map(([id, data]) => ({
       id: id,
@@ -747,7 +1201,7 @@ async function runAudit(){
     }));
     const score = calculateScore(scanResults);
     const explanation = explainScore(scanResults, score);
-    const data = { ok: true, score: score, explanation: explanation, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks, looksJsRendered: looksJsRendered };
+    const data = { ok: true, score: score, explanation: explanation, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks, looksJsRendered: looksJsRendered, wcag: wcag || [] };
     window.lastAudit = data;
     renderAudit(data);
     document.getElementById('requestWebsite').value = data.finalUrl || url;
@@ -769,6 +1223,8 @@ async function runAudit(){
   }finally{ btn.disabled=false; }
 }
 function renderEvidence(c){ return c.evidenceValues?.details || ''; }
+function statusIcon(status){ return status==='pass'?'fa-circle-check':status==='fail'?'fa-circle-xmark':status==='warn'?'fa-triangle-exclamation':status==='na'?'fa-circle-minus':'fa-hand'; }
+function wcagStatusLabel(status){ return status==='pass'?t('wcagPass'):status==='fail'?t('wcagFail'):status==='warn'?t('wcagWarn'):t(status); }
 function renderAudit(data){
   document.getElementById('resultTitle').textContent=(data.hostname||'')+' · '+t('report');
   // Score badge colour reflects the actual number: green >= 70, amber 50-69,
@@ -778,16 +1234,26 @@ function renderAudit(data){
                    : '#b52d21';
   const explanation = data.explanation ? `<span class="evidence" style="color:#37566e;font-weight:600;">${escapeHtml(data.explanation)}</span>` : '';
   const jsNote = data.looksJsRendered ? `<span class="evidence" style="color:#b52d21;font-weight:600;">${escapeHtml(jsRenderedNote())}</span>` : '';
-  document.getElementById('summary').innerHTML=`<div class="score" style="background:${scoreColor}"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div>${explanation}${jsNote}<span class="evidence">${t('manualReview')}</span>`;
+  const wcagLine = (data.wcag && data.wcag.length) ? `<span class="evidence" style="color:#0d47a1;font-weight:600;">${escapeHtml(wcagSummary(data.wcag))}</span>` : '';
+  document.getElementById('summary').innerHTML=`<div class="score" style="background:${scoreColor}"><i class="fa-solid fa-chart-simple"></i>${data.score}/100</div><div><strong>${t('score')}</strong> · ${t('screened')} ${new Date(data.checkedAt).toLocaleString(lang==='es'?'es-US':'en-US')}</div>${explanation}${wcagLine}${jsNote}<span class="evidence">${t('manualReview')}</span>`;
   document.getElementById('checks').innerHTML=data.checks.map(c=>{
     const status=c.status||'manual';
-    const icon=status==='pass'?'fa-circle-check':status==='fail'?'fa-circle-xmark':status==='warn'?'fa-triangle-exclamation':'fa-hand';
-    return `<div class="check ${status}"><i class="fa-solid ${icon}"></i><strong>${escapeHtml(checkText[lang][c.id]||c.id)}</strong><span class="evidence">${t(status)}${renderEvidence(c)?' · '+escapeHtml(renderEvidence(c)):''}</span></div>`
+    const ref = WCAG_REF[c.id] ? `<span class="wcag-tag">${escapeHtml(WCAG_REF[c.id])}</span>` : '';
+    return `<div class="check ${status}"><i class="fa-solid ${statusIcon(status)}"></i><strong>${escapeHtml(checkText[lang][c.id]||c.id)}</strong>${ref}<span class="evidence">${t(status)}${renderEvidence(c)?' · '+escapeHtml(renderEvidence(c)):''}</span></div>`
+  }).join('');
+  const wcag = data.wcag || [];
+  document.getElementById('wcagBlock').classList.toggle('show', wcag.length > 0);
+  const fullList = buildWcagChecklist(data);
+  document.getElementById('wcagFullSummary').textContent = checklistSummary(fullList);
+  document.getElementById('wcagFullTable').innerHTML = checklistTableHtml(fullList);
+  document.getElementById('wcagChecks').innerHTML = wcag.map(c=>{
+    const status=c.status||'manual';
+    return `<div class="check ${status}"><i class="fa-solid ${statusIcon(status)}"></i><strong>${escapeHtml(wcagText[lang][c.id]||c.id)}</strong><span class="wcag-tag">WCAG ${escapeHtml(c.sc)} · ${escapeHtml(c.level)}</span><span class="evidence">${escapeHtml(wcagStatusLabel(status))}${c.evidence?' · '+escapeHtml(c.evidence):''}</span></div>`;
   }).join('');
 }
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]))}
 function reportCss(){
-  return `*{box-sizing:border-box}body{margin:0;background:#eef3f7;color:#12263a;font-family:Arial,sans-serif}.export-report{width:760px;margin:24px auto;background:#fff;padding:40px;line-height:1.45}.export-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding-bottom:18px;border-bottom:4px solid #1e6f9f}.export-brand{font-size:26px;font-weight:800;color:#0a1e2f}.export-brand span{color:#1e6f9f}.export-kicker{color:#547087;font-size:12px;text-transform:uppercase;letter-spacing:1.2px}.export-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.export-meta div,.export-request div{border:1px solid #d8e6f0;border-radius:8px;padding:10px}.export-label{display:block;color:#667d8f;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}.export-score{margin:18px 0;background:linear-gradient(100deg,#0a1e2f,#1e6f9f);color:#fff;border-radius:12px;padding:18px;display:flex;justify-content:space-between;align-items:center}.export-score strong{font-size:32px}.export-section{margin-top:20px}.export-section h2{font-size:16px;color:#0a1e2f;border-bottom:2px solid #c7e1f1;padding-bottom:6px;margin-bottom:10px}.export-check{break-inside:avoid;border:1px solid #d8e6f0;border-left:5px solid #1e6f9f;border-radius:8px;padding:10px;margin-bottom:7px;font-size:11px}.export-check.pass{border-left-color:#17864a}.export-check.warn{border-left-color:#c46a00}.export-check.fail{border-left-color:#b52d21}.export-check.manual{border-left-color:#1e6f9f}.export-check small{display:block;color:#63798b;margin-top:3px}.export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}.export-request .wide{grid-column:1/-1}.export-disclaimer{margin-top:20px;background:#f5f9fc;border-radius:8px;padding:12px;color:#4f687c;font-size:10px}.export-footer{margin-top:18px;padding-top:10px;border-top:1px solid #cbdce8;display:flex;justify-content:space-between;color:#4f687c;font-size:10px}@media print{body{background:#fff}.export-report{margin:0;width:auto;padding:.35in}@page{size:letter;margin:.35in}}`;
+  return `*{box-sizing:border-box}body{margin:0;background:#eef3f7;color:#12263a;font-family:Arial,sans-serif}.export-report{width:760px;margin:24px auto;background:#fff;padding:40px;line-height:1.45}.export-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding-bottom:18px;border-bottom:4px solid #1e6f9f}.export-brand{font-size:26px;font-weight:800;color:#0a1e2f}.export-brand span{color:#1e6f9f}.export-kicker{color:#547087;font-size:12px;text-transform:uppercase;letter-spacing:1.2px}.export-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.export-meta div,.export-request div{border:1px solid #d8e6f0;border-radius:8px;padding:10px}.export-label{display:block;color:#667d8f;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}.export-score{margin:18px 0;background:linear-gradient(100deg,#0a1e2f,#1e6f9f);color:#fff;border-radius:12px;padding:18px;display:flex;justify-content:space-between;align-items:center}.export-score strong{font-size:32px}.export-section{margin-top:20px}.export-section h2{font-size:16px;color:#0a1e2f;border-bottom:2px solid #c7e1f1;padding-bottom:6px;margin-bottom:10px}.export-check{break-inside:avoid;border:1px solid #d8e6f0;border-left:5px solid #1e6f9f;border-radius:8px;padding:10px;margin-bottom:7px;font-size:11px}.export-check.pass{border-left-color:#17864a}.export-check.warn{border-left-color:#c46a00}.export-check.fail{border-left-color:#b52d21}.export-check.manual{border-left-color:#1e6f9f}.export-check.na{border-left-color:#8aa0b2}.export-check small{display:block;color:#63798b;margin-top:3px}.wcag-ref{color:#0d47a1;font-weight:700;font-size:10px;margin-left:6px}.export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}.export-request .wide{grid-column:1/-1}.export-disclaimer{margin-top:20px;background:#f5f9fc;border-radius:8px;padding:12px;color:#4f687c;font-size:10px}.export-footer{margin-top:18px;padding-top:10px;border-top:1px solid #cbdce8;display:flex;justify-content:space-between;color:#4f687c;font-size:10px}@media print{body{background:#fff}.export-report{margin:0;width:auto;padding:.35in}@page{size:letter;margin:.35in}}`;
 }
 function buildProfessionalReport(requestData){
   const data=window.lastAudit; if(!data)return;
@@ -797,11 +1263,16 @@ function buildProfessionalReport(requestData){
     .filter(([key])=>requestData[key]);
   const details=detailFields.map(([key,label])=>`<div class="${key==='message'?'wide':''}"><span class="export-label">${escapeHtml(label)}</span>${escapeHtml(requestData[key])}</div>`).join('');
   const requestSection = detailFields.length ? `<section class="export-section"><h2>${lang==='es'?'Detalles de la solicitud':'Request details'}</h2><div class="export-request">${details}</div></section>` : '';
-  const findings=(data.checks||[]).map(c=>`<div class="export-check ${escapeHtml(c.status||'manual')}"><strong>${escapeHtml(labels[c.id]||c.id)}</strong><small>${escapeHtml(t(c.status||'manual'))}${renderEvidence(c)?' - '+escapeHtml(renderEvidence(c)):''}</small></div>`).join('');
+  const findings=(data.checks||[]).map(c=>`<div class="export-check ${escapeHtml(c.status||'manual')}"><strong>${escapeHtml(labels[c.id]||c.id)}</strong>${WCAG_REF[c.id]?`<span class="wcag-ref">${escapeHtml(WCAG_REF[c.id])}</span>`:''}<small>${escapeHtml(t(c.status||'manual'))}${renderEvidence(c)?' - '+escapeHtml(renderEvidence(c)):''}</small></div>`).join('');
+  const wcagFindings=(data.wcag||[]).map(c=>`<div class="export-check ${escapeHtml(c.status||'manual')}"><strong>${escapeHtml(wcagText[lang][c.id]||c.id)}</strong><span class="wcag-ref">WCAG ${escapeHtml(c.sc)} · ${escapeHtml(c.level)}</span><small>${escapeHtml(wcagStatusLabel(c.status||'manual'))}${c.evidence?' - '+escapeHtml(c.evidence):''}</small></div>`).join('');
+  const fullList = buildWcagChecklist(data);
+  const fullRows = fullList.map(c=>`<div class="export-check ${escapeHtml(c.status)}" style="padding:6px 10px;margin-bottom:4px"><strong>${escapeHtml(c.sc)} ${escapeHtml(c.name)}</strong><span class="wcag-ref">Level ${escapeHtml(c.level)}</span><small>${escapeHtml(checklistStatusLabel(c.status))}${c.evidence?' - '+escapeHtml(c.evidence):''}</small></div>`).join('');
+  const fullSection = `<section class="export-section"><h2>${escapeHtml(t('wcagFullTitle'))}</h2><div class="export-check manual">${escapeHtml(checklistSummary(fullList))}</div>${fullRows}</section>`;
+  const wcagSection = wcagFindings ? `<section class="export-section"><h2>${escapeHtml(t('wcagTitle'))}</h2><div class="export-check manual">${escapeHtml(wcagSummary(data.wcag))}</div>${wcagFindings}</section>` : '';
   const explanation = data.explanation ? `<section class="export-section"><h2>${lang==='es'?'Por qué esta puntuación':'Why this score'}</h2><div class="export-check manual">${escapeHtml(data.explanation)}</div></section>` : '';
   const jsNoteSection = data.looksJsRendered ? `<section class="export-section"><h2>${lang==='es'?'Nota importante':'Important note'}</h2><div class="export-check warn">${escapeHtml(jsRenderedNote())}</div></section>` : '';
   const report=document.getElementById('pdfReport');
-  report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section>${explanation}${jsNoteSection}<section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section>${requestSection}<div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
+  report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section>${explanation}${jsNoteSection}<section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section>${wcagSection}${fullSection}${requestSection}<div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
   report.dataset.filename=`webswan-compliance-report-${String(data.hostname||'website').replace(/[^a-z0-9.-]+/gi,'-')}.pdf`;
 }
 function printReport() {
@@ -823,34 +1294,22 @@ document.getElementById('stateBtn').addEventListener('click',()=>{
   const box=document.getElementById('stateResult');
   if(!p){alert(t('selectFirst'));return}
 
-  const stateData = {
-    "California": { summary: "California has the strictest privacy laws in the US with the CCPA/CPRA.", requirements: ["Post a clear privacy policy", "Provide a 'Do Not Sell' link", "Implement cookie consent banner"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $2,663 per unintentional violation" }, links: [{ text: "CA DOJ - CCPA", url: "https://oag.ca.gov/privacy/ccpa" }] },
-    "New York": { summary: "New York has strict privacy laws including the SHIELD Act.", requirements: ["Maintain a comprehensive privacy policy", "Implement reasonable data security measures", "Provide breach notification within 72 hours"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NY AG - Data Breach", url: "https://ag.ny.gov/resources/organizations/data-breach-reporting" }] },
-    "Texas": { summary: "Texas has the Texas Data Privacy and Security Act (TDPSA).", requirements: ["Post a privacy notice", "Provide opt-out mechanisms", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "TX AG - Consumer Privacy", url: "https://www.texasattorneygeneral.gov/consumer-protection" }] },
-    "Georgia": { summary: "Georgia has data breach notification laws and privacy requirements.", requirements: ["Post a privacy policy", "Data breach notification", "Implement reasonable data security measures"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $2,000 per violation" }, links: [{ text: "GA AG - Consumer Protection", url: "https://law.georgia.gov/consumer-protection" }] },
-    "Florida": { summary: "Florida has the Florida Digital Bill of Rights.", requirements: ["Publish a clear privacy policy", "Disclose data collection practices", "Provide consumer rights to opt-out"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "FL AG - Consumer Protection", url: "https://www.myfloridalegal.com/consumer-protection" }] },
-    "Utah": { summary: "Utah has the Utah Consumer Privacy Act (UCPA).", requirements: ["Post a privacy notice", "Consumer rights: access, correction, deletion", "Opt-out for targeted advertising"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $7,500 per violation" }, links: [{ text: "UT AG - Consumer Protection", url: "https://attorneygeneral.utah.gov/consumer-protection/" }] },
-    "Arizona": { summary: "Arizona has data breach notification laws and privacy requirements.", requirements: ["Post a privacy policy", "Data breach notification within 45 days", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $10,000 per violation" }, links: [{ text: "AZ AG - Consumer Protection", url: "https://www.azag.gov/consumer" }] },
-    "Illinois": { summary: "Illinois has the Biometric Information Privacy Act (BIPA).", requirements: ["Clear privacy policy with biometric disclosure", "Written consent for biometric collection", "Data retention policies"], penalties: { ada: "Up to $115,231 for first violation", privacy: "$1,000 per negligent violation" }, links: [{ text: "IL AG - Privacy", url: "https://illinoisattorneygeneral.gov/consumers/identitytheft/" }] },
-    "North Carolina": { summary: "North Carolina has the NC Identity Theft Protection Act.", requirements: ["Post a privacy policy", "Data breach notification", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NC AG - Consumer Protection", url: "https://ncdoj.gov/consumer/" }] },
-    "Nevada": { summary: "Nevada has the Nevada Privacy Law (NRS 603A).", requirements: ["Post a privacy policy", "Provide opt-out for data sales", "Consumer rights to access and delete data"], penalties: { ada: "Up to $115,231 for first violation", privacy: "Up to $5,000 per violation" }, links: [{ text: "NV AG - Privacy", url: "https://ag.nv.gov/Privacy/" }] }
-  };
-  const data = stateData[p] || stateData["California"];
+  const data = buildStateInfo(p);
   box.classList.add('show');
-  let html = `<h3><i class="fa-solid fa-info-circle"></i> ${p} Compliance Requirements</h3>`;
-  html += `<p><strong>Summary:</strong> ${data.summary}</p>`;
-  html += `<div class="requirement"><strong><i class="fa-solid fa-list-check"></i> Website Requirements:</strong><ul style="margin:6px 0 0 20px">`;
-  data.requirements.forEach(req => { html += `<li>${req}</li>`; });
+  let html = `<h3><i class="fa-solid fa-info-circle"></i> ${escapeHtml(p)} Compliance Requirements</h3>`;
+  html += `<div class="requirement"><strong><i class="fa-solid fa-list-check"></i> ${escapeHtml(p)} Website Requirements:</strong><ul>`;
+  data.reqs.forEach(req => { html += `<li>${req}</li>`; });
   html += `</ul></div>`;
-  html += `<div class="penalty"><strong><i class="fa-solid fa-gavel"></i> Penalties:</strong><br>`;
-  html += `<strong>ADA Violations:</strong> ${data.penalties.ada}<br>`;
-  html += `<strong>Privacy Violations:</strong> ${data.penalties.privacy}`;
-  html += `</div>`;
+  html += `<div class="penalty"><strong><i class="fa-solid fa-gavel"></i> Penalties:</strong><ul>`;
+  data.pens.forEach(pen => { html += `<li>${pen}</li>`; });
+  html += `</ul></div>`;
+  html += FEDERAL_HTML;
   html += `<div class="link-list"><strong><i class="fa-solid fa-link"></i> Official Resources:</strong>`;
   data.links.forEach(link => {
     html += `<a href="${link.url}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${link.text}</a>`;
   });
   html += `</div>`;
+  html += `<p class="asof">Information current as of September 2026. General information only - not legal advice.</p>`;
   box.innerHTML = html;
 });
 document.getElementById('requestForm').addEventListener('submit',async e=>{
