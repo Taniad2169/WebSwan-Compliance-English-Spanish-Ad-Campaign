@@ -1255,6 +1255,37 @@ function escapeHtml(v){return String(v).replace(/[&<>'"]/g,ch=>({'&':'&amp;','<'
 function reportCss(){
   return `*{box-sizing:border-box}body{margin:0;background:#eef3f7;color:#12263a;font-family:Arial,sans-serif}.export-report{width:760px;margin:24px auto;background:#fff;padding:40px;line-height:1.45}.export-header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding-bottom:18px;border-bottom:4px solid #1e6f9f}.export-brand{font-size:26px;font-weight:800;color:#0a1e2f}.export-brand span{color:#1e6f9f}.export-kicker{color:#547087;font-size:12px;text-transform:uppercase;letter-spacing:1.2px}.export-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.export-meta div,.export-request div{border:1px solid #d8e6f0;border-radius:8px;padding:10px}.export-label{display:block;color:#667d8f;font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}.export-score{margin:18px 0;background:linear-gradient(100deg,#0a1e2f,#1e6f9f);color:#fff;border-radius:12px;padding:18px;display:flex;justify-content:space-between;align-items:center}.export-score strong{font-size:32px}.export-section{margin-top:20px}.export-section h2{font-size:16px;color:#0a1e2f;border-bottom:2px solid #c7e1f1;padding-bottom:6px;margin-bottom:10px}.export-check{break-inside:avoid;border:1px solid #d8e6f0;border-left:5px solid #1e6f9f;border-radius:8px;padding:10px;margin-bottom:7px;font-size:11px}.export-check.pass{border-left-color:#17864a}.export-check.warn{border-left-color:#c46a00}.export-check.fail{border-left-color:#b52d21}.export-check.manual{border-left-color:#1e6f9f}.export-check.na{border-left-color:#8aa0b2}.export-check small{display:block;color:#63798b;margin-top:3px}.wcag-ref{color:#0d47a1;font-weight:700;font-size:10px;margin-left:6px}.export-request{display:grid;grid-template-columns:1fr 1fr;gap:8px}.export-request .wide{grid-column:1/-1}.export-disclaimer{margin-top:20px;background:#f5f9fc;border-radius:8px;padding:12px;color:#4f687c;font-size:10px}.export-footer{margin-top:18px;padding-top:10px;border-top:1px solid #cbdce8;display:flex;justify-content:space-between;color:#4f687c;font-size:10px}@media print{body{background:#fff}.export-report{margin:0;width:auto;padding:.35in}@page{size:letter;margin:.35in}}`;
 }
+  // ===================== STATE COMPLIANCE REFERENCE LINKS =====================
+  // Links added to the printed/PDF report for the state the report is prepared for.
+  // State links are live Google searches for that state; the others are official pages.
+  function wsComplianceLinks(state) {
+    const s = (state || '').trim();
+    const g = q => 'https://www.google.com/search?q=' + encodeURIComponent(q.trim());
+    return [
+      { t: (s || 'Your state') + ': website accessibility (ADA) lawsuits and penalties', u: g(s + ' website accessibility ADA lawsuit penalty for businesses') },
+      { t: (s || 'Your state') + ': website privacy and cookie consent penalties', u: g(s + ' website privacy law cookie consent penalty attorney general') },
+      { t: 'U.S. Department of Justice: Guidance on Web Accessibility and the ADA', u: 'https://www.ada.gov/resources/web-guidance/' },
+      { t: 'HHS: HIPAA rules for website tracking technologies (forms, analytics, pixels)', u: 'https://www.hhs.gov/hipaa/for-professionals/privacy/guidance/hipaa-online-tracking/index.html' },
+      { t: 'HHS: Business Associate Agreements (BAA) and sample provisions', u: 'https://www.hhs.gov/hipaa/for-professionals/covered-entities/sample-business-associate-agreement-provisions/index.html' },
+      { t: 'California Attorney General: Sephora $1.2 million website privacy settlement', u: 'https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-settlement-sephora-part-ongoing-enforcement' }
+    ];
+  }
+  function wsComplianceLinksHTML(state) {
+    return wsComplianceLinks(state).map(l => '<li style="margin-bottom:6px;"><a href="' + l.u + '" target="_blank" rel="noopener" style="color:#1e6f9f;text-decoration:underline;">' + l.t.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</a></li>').join('');
+  }
+  const WS_STATE_ABBR = {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',DC:'District of Columbia',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming'};
+  // Works out the state from "City, ST" or "City, State" text.
+  function wsStateFromText(text) {
+    const t = (text || '').trim(); if (!t) return '';
+    const last = t.split(',').pop().trim().replace(/\s+\d{5}(-\d{4})?$/, '');
+    if (WS_STATE_ABBR[last.toUpperCase()]) return WS_STATE_ABBR[last.toUpperCase()];
+    const word = last.split(/\s+/).pop();
+    if (/^[A-Z]{2}$/.test(word) && WS_STATE_ABBR[word]) return WS_STATE_ABBR[word];
+    const names = Object.values(WS_STATE_ABBR).sort((a, b) => b.length - a.length);
+    const low = t.toLowerCase();
+    return names.find(n => low.endsWith(n.toLowerCase())) || names.find(n => low.includes(n.toLowerCase())) || '';
+  }
+
 function buildProfessionalReport(requestData){
   const data=window.lastAudit; if(!data)return;
   const labels=checkText[lang];
@@ -1273,6 +1304,8 @@ function buildProfessionalReport(requestData){
   const jsNoteSection = data.looksJsRendered ? `<section class="export-section"><h2>${lang==='es'?'Nota importante':'Important note'}</h2><div class="export-check warn">${escapeHtml(jsRenderedNote())}</div></section>` : '';
   const report=document.getElementById('pdfReport');
   report.innerHTML=`<header class="export-header"><div><div class="export-brand">The <span>WebSwan</span></div><div class="export-kicker">${lang==='es'?'Informe profesional de evaluación web':'Professional website screening report'}</div></div><div class="export-kicker">${escapeHtml(checkedAt)}</div></header><section class="export-meta"><div><span class="export-label">${escapeHtml(t('website'))}</span>${escapeHtml(data.finalUrl||requestData.website||data.hostname||'')}</div><div><span class="export-label">${lang==='es'?'Estado del informe':'Report status'}</span>${escapeHtml(t('screened'))} - ${escapeHtml(t('manualReview'))}</div></section><section class="export-score"><div><strong>${escapeHtml(data.score)}/100</strong></div><div>${escapeHtml(t('score'))}</div></section>${explanation}${jsNoteSection}<section class="export-section"><h2>${lang==='es'?'Hallazgos de la evaluación':'Screening findings'}</h2>${findings}</section>${wcagSection}${fullSection}${requestSection}<div class="export-disclaimer">${escapeHtml(t('auditNotice'))}</div><footer class="export-footer"><span>© 2026 The WebSwan</span><span>www.thewebswan.com</span></footer>`;
+  const reportState=(document.getElementById('jurisdiction')||{}).value||'';
+  report.innerHTML+=`<section class="export-section"><h2>${lang==='es'?'Enlaces de referencia de cumplimiento':'Compliance reference links'}${reportState?(lang==='es'?' para ':' for ')+escapeHtml(reportState):''}</h2><div class="export-check manual">${lang==='es'?'Haga clic en cualquier enlace para leer las reglas y sanciones.':'Click any link to read the rules and penalties for yourself.'}</div><ul style="padding-left:20px;margin-top:10px">${wsComplianceLinksHTML(reportState)}</ul></section>`;
   report.dataset.filename=`webswan-compliance-report-${String(data.hostname||'website').replace(/[^a-z0-9.-]+/gi,'-')}.pdf`;
 }
 function printReport() {
@@ -1288,6 +1321,7 @@ function printReport() {
   win.document.close();
   setTimeout(()=>{win.focus();win.print()},400);
 }
+document.getElementById('jurisdiction').addEventListener('change',()=>{if(window.lastAudit)buildProfessionalReport(window.lastRequest||{})});
 document.getElementById('language').addEventListener('change',e=>{lang=e.target.value;applyLanguage()});
 document.getElementById('stateBtn').addEventListener('click',()=>{
   const p=document.getElementById('jurisdiction').value;
