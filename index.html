@@ -390,6 +390,7 @@ async function scanWebsite(url) {
   // Let failures here propagate to the caller instead of being swallowed -
   // that's what let a dead proxy masquerade as a bad scorecard before.
   const html = await fetchViaProxies(url);
+  window.__wsLastHtml = html;
   // Detect pages that render most of their content client-side (React,
   // Vue, Next.js, Angular, etc). On these sites the raw HTML we fetch is
   // mostly an empty shell - the real cookie banner, accessibility widget,
@@ -1206,6 +1207,7 @@ async function runAudit(){
     const explanation = explainScore(scanResults, score);
     const data = { ok: true, score: score, explanation: explanation, hostname: hostname, finalUrl: url, checkedAt: new Date().toISOString(), checks: checks, looksJsRendered: looksJsRendered, wcag: wcag || [] };
     window.lastAudit = data;
+    try { const jsel = document.getElementById('jurisdiction'); if (jsel && (!jsel.value || jsel.dataset.auto === jsel.value)) { const st = wsDetectStateFromHtml(window.__wsLastHtml); if (st) { jsel.value = st; jsel.dataset.auto = st; data.stateAuto = st; } else if (jsel.dataset.auto) { jsel.value = ''; delete jsel.dataset.auto; } } } catch (e) {}
     renderAudit(data);
     document.getElementById('requestWebsite').value = data.finalUrl || url;
     document.getElementById('requestWebsiteHidden').value = data.finalUrl || url;
@@ -1261,17 +1263,44 @@ function reportCss(){
   // ===================== STATE COMPLIANCE REFERENCE LINKS =====================
   // Links added to the printed/PDF report for the state the report is prepared for.
   // State links are live Google searches for that state; the others are official pages.
+  // Permanent WebSwan credentials page (shown on every report).
+  const WS_CREDENTIAL_URL = 'https://taniad2169.github.io/WebSWan-Alignable/';
+  // States covered by the Accessibility Checker "ADA website lawsuits by state" article.
+  const WS_LAWSUIT_STATES = ['New York','Florida','California','Illinois'];
   function wsComplianceLinks(state) {
     const s = (state || '').trim();
+    const es = (typeof lang !== 'undefined' && lang === 'es');
     const g = q => 'https://www.google.com/search?q=' + encodeURIComponent(q.trim());
-    return [
-      { t: (s || 'Your state') + ': website accessibility (ADA) lawsuits and penalties', u: g(s + ' website accessibility ADA lawsuit penalty for businesses') },
-      { t: (s || 'Your state') + ': website privacy and cookie consent penalties', u: g(s + ' website privacy law cookie consent penalty attorney general') },
-      { t: 'U.S. Department of Justice: Guidance on Web Accessibility and the ADA', u: 'https://www.ada.gov/resources/web-guidance/' },
-      { t: 'HHS: HIPAA rules for website tracking technologies (forms, analytics, pixels)', u: 'https://www.hhs.gov/hipaa/for-professionals/privacy/guidance/hipaa-online-tracking/index.html' },
-      { t: 'HHS: Business Associate Agreements (BAA) and sample provisions', u: 'https://www.hhs.gov/hipaa/for-professionals/covered-entities/sample-business-associate-agreement-provisions/index.html' },
-      { t: 'California Attorney General: Sephora $1.2 million website privacy settlement', u: 'https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-settlement-sephora-part-ongoing-enforcement' }
-    ];
+    const L = [];
+    if (s) {
+      L.push({ t: s + (es ? ': demandas y sanciones por accesibilidad web (ADA)' : ': website accessibility (ADA) lawsuits and penalties'), u: g(s + ' website accessibility ADA lawsuit penalty for businesses') });
+      L.push({ t: s + (es ? ': sanciones por privacidad web y consentimiento de cookies' : ': website privacy and cookie consent penalties'), u: g(s + ' website privacy law cookie consent penalty attorney general') });
+      if (WS_LAWSUIT_STATES.includes(s)) L.push({ t: (es ? 'Demandas ADA por sitios web por estado (California, Florida, Nueva York, Illinois)' : 'ADA website lawsuits by state: California, Florida, New York and Illinois'), u: 'https://www.accessibilitychecker.org/blog/ada-website-lawsuits-by-state/' });
+      (typeof STATE_LINKS !== 'undefined' && STATE_LINKS[s] || []).forEach(l => L.push({ t: s + (es ? ' (oficial): ' : ' official resource: ') + l.text, u: l.url }));
+      if (s === 'California') L.push({ t: (es ? 'Fiscal General de California: acuerdo de $1.2 millones con Sephora por privacidad web' : 'California Attorney General: Sephora $1.2 million website privacy settlement'), u: 'https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-settlement-sephora-part-ongoing-enforcement' });
+    }
+    L.push({ t: (es ? 'Departamento de Justicia de EE. UU.: guía de accesibilidad web y la ADA (todos los estados)' : 'U.S. Department of Justice: Guidance on Web Accessibility and the ADA (applies in every state)'), u: 'https://www.ada.gov/resources/web-guidance/' });
+    L.push({ t: (es ? 'HHS: reglas HIPAA para tecnologías de rastreo en sitios web (formularios, analítica, píxeles)' : 'HHS: HIPAA rules for website tracking technologies (forms, analytics, pixels)'), u: 'https://www.hhs.gov/hipaa/for-professionals/privacy/guidance/hipaa-online-tracking/index.html' });
+    L.push({ t: (es ? 'HHS: Acuerdos de Asociado Comercial (BAA) y cláusulas de ejemplo' : 'HHS: Business Associate Agreements (BAA) and sample provisions'), u: 'https://www.hhs.gov/hipaa/for-professionals/covered-entities/sample-business-associate-agreement-provisions/index.html' });
+    L.push({ t: (es ? 'The WebSwan: credenciales, certificaciones y recomendaciones de clientes' : 'The WebSwan: credentials, certifications and client recommendations'), u: WS_CREDENTIAL_URL });
+    return L;
+  }
+  // Finds the business's state from the address on the scanned page
+  // (schema.org addressRegion, "City, ST 12345" or "State 12345").
+  function wsDetectStateFromHtml(html) {
+    if (!html) return '';
+    const votes = {};
+    const vote = (name, w) => { if (name) votes[name] = (votes[name] || 0) + w; };
+    const norm = v => { v = String(v || '').trim(); if (WS_STATE_ABBR[v.toUpperCase()]) return WS_STATE_ABBR[v.toUpperCase()]; return Object.values(WS_STATE_ABBR).find(n => n.toLowerCase() === v.toLowerCase()) || ''; };
+    (html.match(/"addressRegion"\s*:\s*"([^"]{2,30})"/gi) || []).forEach(m => vote(norm(m.replace(/.*:\s*"/, '').replace(/"$/, '')), 5));
+    const text = html.replace(/<script(?![^>]*ld\+json)[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/g, ' ').replace(/\s+/g, ' ');
+    let m; const re1 = /,\s*([A-Z]{2})\.?,?\s+(\d{5})(?:-\d{4})?\b/g;
+    while ((m = re1.exec(text))) vote(WS_STATE_ABBR[m[1]] || '', 2);
+    const names = Object.values(WS_STATE_ABBR).map(n => n.replace(/ /g, '\\s+')).join('|');
+    const re2 = new RegExp('\\b(' + names + ')\\s*,?\\s+\\d{5}\\b', 'gi');
+    while ((m = re2.exec(text))) vote(norm(m[1].replace(/\s+/g, ' ')), 2);
+    let best = '', top = 0; Object.keys(votes).forEach(k => { if (votes[k] > top) { top = votes[k]; best = k; } });
+    return best;
   }
   function wsComplianceLinksHTML(state) {
     return wsComplianceLinks(state).map(l => '<li style="margin-bottom:6px;"><a href="' + l.u + '" target="_blank" rel="noopener" style="color:#1e6f9f;text-decoration:underline;">' + l.t.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</a></li>').join('');
@@ -1324,7 +1353,7 @@ function printReport() {
   win.document.close();
   setTimeout(()=>{win.focus();win.print()},400);
 }
-document.getElementById('jurisdiction').addEventListener('change',()=>{if(window.lastAudit)buildProfessionalReport(window.lastRequest||{})});
+document.getElementById('jurisdiction').addEventListener('change',e=>{delete e.target.dataset.auto;if(window.lastAudit)buildProfessionalReport(window.lastRequest||{})});
 document.getElementById('language').addEventListener('change',e=>{lang=e.target.value;applyLanguage()});
 document.getElementById('stateBtn').addEventListener('click',()=>{
   const p=document.getElementById('jurisdiction').value;
