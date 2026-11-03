@@ -1506,7 +1506,7 @@ applyLanguage();
    window.lastAudit); it never changes the original code or its report. */
 (function () {
   // Paste the Stripe Payment Link for the $399 audit here (Stripe Dashboard > Payment Links). Empty = we email/text the link.
-  const STRIPE_AUDIT_LINK = '';
+  const STRIPE_AUDIT_LINK = 'https://buy.stripe.com/eVqbJ3ent8WQ9Bs4tG3Nm07';
   const $ = id => document.getElementById(id);
   const esc = v => String(v == null ? '' : v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const L = () => (typeof lang !== 'undefined' && lang === 'es') ? 'es' : 'en';
