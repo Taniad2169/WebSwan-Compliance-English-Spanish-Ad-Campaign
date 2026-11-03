@@ -186,6 +186,59 @@
       </label>
       <button id="analyzeBtn" class="primary" type="button"><i class="fa-solid fa-robot"></i> <span data-i18n="analyze">Analyze</span></button>
     </div>
+
+    <!-- ===== WebSwan add-on (Nov 2026): 3 test buttons, ADA 13-category tester, $399 deep audit CTA + form. Self-contained; does not change the original checker above. ===== -->
+    <style>
+      .wsx-modes{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
+      .wsx-modes button{flex:1;min-width:180px;border:2px solid #1e6f9f;background:#fff;color:#0a1e2f;border-radius:999px;padding:10px 16px;font:inherit;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+      .wsx-modes button:hover,.wsx-modes button.on{background:linear-gradient(45deg,#0a1e2f,#1e6f9f);color:#fff}
+      .wsx-modes button:disabled{opacity:.55;cursor:wait}
+      .wsx-modes button:focus-visible,.wsx-cta-btn:focus-visible,.wsx-link:focus-visible{outline:3px solid #f2b705;outline-offset:2px}
+      .wsx-hint{font-size:.82rem;color:#37566e;margin-bottom:6px}
+      #result.wsx-privacy-only .wsx-ada-row,#result.wsx-privacy-only #wcagBlock,#result.wsx-privacy-only #summary{display:none!important}
+      #result.wsx-hide{display:none!important}
+      .wsx-panel{display:none;margin-top:16px;border:2px solid #d0dcec;border-radius:20px;background:#fff;overflow:hidden}
+      .wsx-panel.show{display:block}
+      .wsx-head{background:linear-gradient(45deg,#0a1e2f,#1e6f9f);color:#fff;padding:14px 18px;font-weight:800;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+      .wsx-body{padding:16px 18px}
+      .wsx-top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+      .wsx-score{font-size:1.6rem;font-weight:900;color:#fff;border-radius:16px;padding:10px 16px;min-width:110px;text-align:center}
+      .wsx-score small{display:block;font-size:.7rem;font-weight:700;opacity:.9}
+      .wsx-note{background:#fff7e0;border-left:5px solid #f2b705;border-radius:10px;padding:10px 12px;font-size:.88rem;margin:10px 0}
+      .wsx-cat{border:1px solid #e0edf7;border-left:6px solid #1e6f9f;border-radius:14px;padding:12px 14px;margin:10px 0;background:#f9fcff}
+      .wsx-cat.fail{border-left-color:#b52d21}.wsx-cat.warn{border-left-color:#c46a00}.wsx-cat.pass{border-left-color:#17864a}.wsx-cat.na{border-left-color:#8aa0b4}
+      .wsx-cat h4{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:1rem}
+      .wsx-pill{font-size:.75rem;font-weight:800;border-radius:999px;padding:2px 10px;background:#e3eef8;color:#0d47a1}
+      .wsx-bar{height:8px;border-radius:99px;background:#e3eef8;margin:8px 0;overflow:hidden}.wsx-bar i{display:block;height:100%;border-radius:99px}
+      .wsx-cat p{font-size:.9rem;margin:6px 0;color:#21384d}
+      .wsx-cat ul{margin:6px 0 2px 20px;font-size:.88rem}
+      .wsx-cat li{margin:2px 0;word-break:break-word}
+      .wsx-manual{columns:2;font-size:.88rem;margin:8px 0 0 20px}
+      .wsx-cta{margin-top:18px;border-radius:20px;padding:20px;background:linear-gradient(135deg,#0a1e2f,#1e6f9f);color:#fff;text-align:center}
+      .wsx-cta h3{font-size:1.3rem;margin-bottom:6px;color:#fff}.wsx-cta p,.wsx-cta strong{color:#fff!important;opacity:.97;margin:6px auto;max-width:640px}.wsx-cta .wsx-states p,.wsx-cta .wsx-states strong{color:#0a1e2f!important}
+      .wsx-cta-btn{display:inline-flex;align-items:center;gap:8px;margin-top:10px;border:0;border-radius:999px;padding:13px 28px;background:#f2b705;color:#0a1e2f;font:inherit;font-weight:900;font-size:1.05rem;cursor:pointer}
+      .wsx-link{color:#fff;font-weight:800;text-decoration:underline;background:none;border:0;font:inherit;cursor:pointer}
+      .wsx-states{display:none;text-align:left;background:#fff;color:#0a1e2f;border-radius:14px;padding:14px 16px;margin:12px auto 0;max-width:640px}
+      .wsx-states.show{display:block}.wsx-states li{margin:3px 0 3px 18px}.wsx-states a{color:#0d47a1}
+      .wsx-form{display:none;margin-top:16px;border:2px solid #1e6f9f;border-radius:20px;padding:18px;background:#f5faff}
+      .wsx-form.show{display:block;animation:wsxIn .5s ease}
+      @keyframes wsxIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+      @media (prefers-reduced-motion: reduce){.wsx-form.show{animation:none}}
+      .wsx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .wsx-grid label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:700}
+      .wsx-grid .full{grid-column:1/-1}
+      .wsx-disclaimer{font-size:.82rem;color:#37566e;background:#fff;border:1px solid #d0dcec;border-radius:12px;padding:10px 12px}
+      .wsx-steps{margin:8px 0 8px 20px;font-size:.9rem}
+      .wsx-pay{display:none;margin-top:12px;text-align:center}
+      .wsx-pay.show{display:block}
+      @media(max-width:700px){.wsx-grid{grid-template-columns:1fr}.wsx-manual{columns:1}.wsx-modes button{min-width:100%}}
+    </style>
+    <div class="wsx-modes" role="group" aria-label="Choose what to test">
+      <button type="button" id="wsxPrivacy"><i class="fa-solid fa-cookie-bite"></i> <span data-wsx="btnPrivacy">Check Cookie &amp; Privacy only</span></button>
+      <button type="button" id="wsxAda"><i class="fa-solid fa-universal-access"></i> <span data-wsx="btnAda">Check ADA Accessibility only</span></button>
+      <button type="button" id="wsxBoth"><i class="fa-solid fa-shield-halved"></i> <span data-wsx="btnBoth">Check Both</span></button>
+    </div>
+    <p class="wsx-hint" data-wsx="modeHint">Some states only enforce ADA accessibility, others also enforce privacy and cookie consent. Pick what you need, or check both.</p>
     <p class="notice"><i class="fa-solid fa-circle-info"></i> <span data-i18n="auditNotice">Automated findings are evidence-based screening, not legal certification. Manual accessibility and legal review may still be required.</span></p>
     <div id="result" class="result" aria-live="polite">
       <div class="result-head"><i class="fa-solid fa-clipboard-list"></i> <span id="resultTitle" data-i18n="report">Website Screening Report</span></div>
@@ -212,6 +265,46 @@
         </div>
       </div>
     </div>
+
+    <!-- WebSwan add-on: ADA accessibility results, privacy-only summary, $399 deep audit -->
+    <div id="wsxPanel" class="wsx-panel" aria-live="polite"></div>
+    <div id="wsxCta" class="wsx-cta" hidden>
+      <h3 data-wsx="ctaTitle">Need a deeper test to find out what's behind your website?</h3>
+      <p data-wsx="ctaText">A free scan only sees part of the picture. Our technician does a thorough audit for ADA accessibility, cookies, privacy, HIPAA and bar rules, page by page, by hand and with tools, and explains every finding in plain language.</p>
+      <p><strong data-wsx="ctaPrice">Full website compliance audit: $399</strong></p>
+      <button type="button" class="wsx-cta-btn" id="wsxStart"><i class="fa-solid fa-hand-point-right"></i> <span data-wsx="ctaBtn">Click here to start</span></button>
+      <p style="margin-top:14px"><button type="button" class="wsx-link" id="wsxStatesBtn" aria-expanded="false" aria-controls="wsxStates" data-wsx="statesBtn">Is your state one of the major website compliance lawsuit states? Click to view</button></p>
+      <div id="wsxStates" class="wsx-states"></div>
+    </div>
+    <section id="wsxForm" class="wsx-form" aria-labelledby="wsxFormTitle">
+      <h3 id="wsxFormTitle"><i class="fa-solid fa-clipboard-check"></i> <span data-wsx="formTitle">Start your $399 website compliance audit</span></h3>
+      <p style="margin:6px 0;font-size:.92rem" data-wsx="formIntro">Here is what happens next:</p>
+      <ol class="wsx-steps">
+        <li data-wsx="step1">You fill out this form and pay securely.</li>
+        <li data-wsx="step2">We run the full audit and contact you within 48 hours with your results.</li>
+        <li data-wsx="step3">You will receive a call from Rachel, our virtual assistant, to set your 15-minute phone appointment.</li>
+        <li data-wsx="step4">At your scheduled time, Tania reviews your website audit with you: the findings and your options.</li>
+      </ol>
+      <form id="wsxAuditForm" name="deep-audit-399" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="deep-audit-399"><p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
+        <input type="hidden" name="scan_summary" id="wsxScanSummary">
+        <div class="wsx-grid">
+          <label><span data-wsx="fName">Full name</span><input class="field" name="name" required autocomplete="name"></label>
+          <label><span data-wsx="fBusiness">Business / practice name</span><input class="field" name="business" required autocomplete="organization"></label>
+          <label><span data-wsx="fEmail">Email address</span><input class="field" name="email" type="email" required autocomplete="email"></label>
+          <label><span data-wsx="fPhone">Phone number (Rachel will call this number)</span><input class="field" name="phone" type="tel" required autocomplete="tel"></label>
+          <label class="full"><span data-wsx="fWebsite">Website to audit</span><input class="field" name="website" id="wsxWebsite" required inputmode="url"></label>
+          <label><span data-wsx="fState">State where you operate</span><input class="field" name="state" id="wsxState" required autocomplete="address-level1"></label>
+          <label><span data-wsx="fType">Type of business</span><select name="business_type" required><option value="" data-wsx="optChoose">Choose one</option><option value="Medical / dental / chiropractic" data-wsx="optMed">Medical, dental or chiropractic</option><option value="Law firm" data-wsx="optLaw">Law firm</option><option value="Other business" data-wsx="optOther">Other business</option></select></label>
+          <label class="full"><span data-wsx="fTime">Best days and times to reach you</span><input class="field" name="best_time"></label>
+          <p class="wsx-disclaimer full" data-wsx-html="disclaimer"></p>
+          <label class="full" style="flex-direction:row;align-items:flex-start;gap:8px;font-weight:600"><input type="checkbox" name="consent" required style="margin-top:4px"><span data-wsx="consent">I agree to the information use described above, and I agree to receive a call from WebSwan's virtual assistant to schedule my appointment.</span></label>
+          <button class="primary full" type="submit"><i class="fa-solid fa-lock"></i> <span data-wsx="submit">Continue to secure payment ($399)</span></button>
+          <p id="wsxFormMsg" class="full" aria-live="polite" style="font-weight:700"></p>
+        </div>
+      </form>
+      <div id="wsxPay" class="wsx-pay"></div>
+    </section>
     <div id="secretModal" class="secret-modal-overlay" aria-hidden="true">
       <div class="secret-modal-box">
         <p id="secretModalIcon">🔐</p>
@@ -1404,6 +1497,346 @@ document.getElementById('requestForm').addEventListener('submit',async e=>{
   }
 });
 applyLanguage();
+</script>
+<script>
+/* ===== WebSwan add-on (Nov 2026) =====
+   Three test buttons (privacy only / ADA only / both), a 13-category ADA accessibility tester
+   explained in plain WebSwan language, and the $399 deep-audit call to action + form.
+   It only READS from the original checker (runAudit, fetchViaProxies, normalizeDomain, lang,
+   window.lastAudit); it never changes the original code or its report. */
+(function () {
+  // Paste the Stripe Payment Link for the $399 audit here (Stripe Dashboard > Payment Links). Empty = we email/text the link.
+  const STRIPE_AUDIT_LINK = '';
+  const $ = id => document.getElementById(id);
+  const esc = v => String(v == null ? '' : v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+  const L = () => (typeof lang !== 'undefined' && lang === 'es') ? 'es' : 'en';
+
+  const TX = {
+    en: {
+      btnPrivacy: 'Check Cookie & Privacy only', btnAda: 'Check ADA Accessibility only', btnBoth: 'Check Both',
+      modeHint: 'Some states only enforce ADA accessibility, others also enforce privacy and cookie consent. Pick what you need, or check both.',
+      ctaTitle: "Need a deeper test to find out what's behind your website?",
+      ctaText: 'A free scan only sees part of the picture. Our technician does a thorough audit for ADA accessibility, cookies, privacy, HIPAA and bar rules, page by page, by hand and with tools, and explains every finding in plain language.',
+      ctaPrice: 'Full website compliance audit: $399', ctaBtn: 'Click here to start',
+      statesBtn: 'Is your state one of the major website compliance lawsuit states? Click to view',
+      formTitle: 'Start your $399 website compliance audit', formIntro: 'Here is what happens next:',
+      step1: 'You fill out this form and pay securely.', step2: 'We run the full audit and contact you within 48 hours with your results.',
+      step3: 'You will receive a call from Rachel, our virtual assistant, to set your 15-minute phone appointment.',
+      step4: 'At your scheduled time, Tania reviews your website audit with you: the findings and your options.',
+      fName: 'Full name', fBusiness: 'Business / practice name', fEmail: 'Email address', fPhone: 'Phone number (Rachel will call this number)',
+      fWebsite: 'Website to audit', fState: 'State where you operate', fType: 'Type of business', optChoose: 'Choose one', optMed: 'Medical, dental or chiropractic', optLaw: 'Law firm', optOther: 'Other business',
+      fTime: 'Best days and times to reach you',
+      disclaimer: '<strong>Why we ask for your information:</strong> WebSwan Digital Solutions collects your name, business, email, phone, website and state only to run your website audit, send you the results, and call you to schedule and hold your review appointment. We do not sell or share your information. Your payment is handled by Stripe; we never see or store your card number. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. The audit is a technical review of your website, not legal advice.',
+      consent: "I agree to the information use described above, and I agree to receive a call from WebSwan's virtual assistant to schedule my appointment.",
+      submit: 'Continue to secure payment ($399)',
+      sending: 'Sending...', sent: 'Thank you! Your request is in. We will contact you within 48 hours with your results, and Rachel, our virtual assistant, will call you to set your 15-minute appointment.',
+      payNow: 'Pay $399 securely with Stripe', payLater: 'We will send you a secure Stripe payment link by email to complete your $399 audit.',
+      sendErr: 'Sorry, that did not go through. Please call (316) 248-6839 and Rachel will take your request.',
+      needUrl: 'Please type a website address first, like www.yourpractice.com',
+      adaTitle: 'ADA Accessibility Test', privTitle: 'Cookie & Privacy Test',
+      scanning: 'Testing your homepage and up to 4 more pages. This can take up to a minute...',
+      pagesTested: 'Pages tested', autoScore: 'Automated accessibility score',
+      honest: "Important: automated tools can only check about a third of the accessibility rules (WCAG 2.1 AA). The rest, like whether a blind person can actually book an appointment with a screen reader, or whether the site works with a keyboard only, needs a person to test it. That is exactly what our $399 audit covers.",
+      found: 'What we found', allGood: 'No problems found in this area on the pages we tested.', na: 'Nothing to test here on these pages.', more: 'more',
+      manualTitle: 'What a machine cannot test (covered in our $399 audit)',
+      manual: ['Using the whole site with a keyboard only', 'Listening to it with a screen reader (NVDA / VoiceOver)', 'Focus order and visible focus', 'Whether form errors are explained clearly', 'Zoom to 200% and phone readability', 'Real color contrast of every text and button', 'Video captions and audio transcripts quality', 'Whether online booking and payment work for disabled visitors', 'Cookie banner really blocking tracking until "Accept"', 'HIPAA forms and attorney advertising disclaimers'],
+      jsNote: 'This website builds most of its content with JavaScript after it loads, so a quick scan cannot see everything. A full audit is recommended.',
+      fetchFail: 'We could not reach this website from our tester (it may block automated checks). Our technician can test it by hand in the full audit.',
+      privScore: 'Privacy & cookie score', privIntro: 'This checks whether visitors are told what you collect and asked before tracking starts.',
+      privItems: { https: 'Secure connection (https)', privacyLink: 'Privacy policy link', privacyDetails: 'Privacy policy explains what you collect', consent: 'Cookie consent banner' },
+      privWhy: { https: 'The lock next to your web address encrypts what visitors type. Without it, browsers show "Not secure".', privacyLink: 'Privacy laws expect a privacy policy that visitors can find from every page.', privacyDetails: 'The policy must say what you collect, why, and who you share it with.', consent: 'A cookie banner asks visitors "Do you accept?" before tracking tools start watching them.' },
+      pass: 'Passed', warn: 'Needs attention', fail: 'Problem found', manualS: 'Needs a person to check',
+      statesHTML: '<p><strong>States with the most website accessibility (ADA) lawsuits in 2025 (federal court):</strong></p><ul><li>California: 3,252 lawsuits (plus at least $4,000 per violation under the Unruh Act)</li><li>Florida: 1,823 lawsuits</li><li>New York: 1,471 lawsuits (many more in New York state court)</li><li>Followed by Illinois, Pennsylvania and New Jersey</li></ul><p>California also leads in website tracking (pixel) privacy lawsuits. Every state follows the federal ADA, so a business anywhere can be sued.</p><p><a href="https://www.adatitleiii.com/2026/03/federal-court-website-accessibility-lawsuit-filings-bounce-back-in-2025/" target="_blank" rel="noopener">Read the 2025 lawsuit numbers by state (Seyfarth Shaw)</a> · <a href="#stateTitle" id="wsxGoState">See the rules and penalties for your state</a></p>'
+    },
+    es: {
+      btnPrivacy: 'Revisar solo Cookies y Privacidad', btnAda: 'Revisar solo Accesibilidad ADA', btnBoth: 'Revisar Ambos',
+      modeHint: 'Algunos estados solo exigen accesibilidad ADA; otros también exigen privacidad y consentimiento de cookies. Elija lo que necesita o revise ambos.',
+      ctaTitle: '¿Necesita una prueba más profunda para saber qué hay detrás de su sitio web?',
+      ctaText: 'Un escaneo gratuito solo ve una parte. Nuestra técnica hace una auditoría completa de accesibilidad ADA, cookies, privacidad, HIPAA y reglas del colegio de abogados, página por página, a mano y con herramientas, y explica cada hallazgo en lenguaje sencillo.',
+      ctaPrice: 'Auditoría completa de cumplimiento web: $399', ctaBtn: 'Haga clic aquí para comenzar',
+      statesBtn: '¿Su estado es uno de los que tienen más demandas por cumplimiento web? Haga clic para ver',
+      formTitle: 'Comience su auditoría de cumplimiento web de $399', formIntro: 'Esto es lo que sigue:',
+      step1: 'Usted llena este formulario y paga de forma segura.', step2: 'Hacemos la auditoría completa y le contactamos dentro de 48 horas con sus resultados.',
+      step3: 'Recibirá una llamada de Rachel, nuestra asistente virtual, para fijar su cita telefónica de 15 minutos.',
+      step4: 'A la hora acordada, Tania revisa con usted la auditoría de su sitio web: los hallazgos y sus opciones.',
+      fName: 'Nombre completo', fBusiness: 'Nombre del negocio / consultorio', fEmail: 'Correo electrónico', fPhone: 'Teléfono (Rachel llamará a este número)',
+      fWebsite: 'Sitio web a auditar', fState: 'Estado donde opera', fType: 'Tipo de negocio', optChoose: 'Elija uno', optMed: 'Médico, dental o quiropráctico', optLaw: 'Bufete de abogados', optOther: 'Otro negocio',
+      fTime: 'Mejores días y horas para contactarle',
+      disclaimer: '<strong>Por qué pedimos su información:</strong> WebSwan Digital Solutions recoge su nombre, negocio, correo, teléfono, sitio web y estado solo para hacer la auditoría de su sitio, enviarle los resultados y llamarle para programar y realizar su cita de revisión. No vendemos ni compartimos su información. Su pago lo procesa Stripe; nunca vemos ni guardamos el número de su tarjeta. Vea nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>. La auditoría es una revisión técnica de su sitio web, no asesoría legal.',
+      consent: 'Acepto el uso de mi información descrito arriba y acepto recibir una llamada de la asistente virtual de WebSwan para programar mi cita.',
+      submit: 'Continuar al pago seguro ($399)',
+      sending: 'Enviando...', sent: '¡Gracias! Recibimos su solicitud. Le contactaremos dentro de 48 horas con sus resultados, y Rachel, nuestra asistente virtual, le llamará para fijar su cita de 15 minutos.',
+      payNow: 'Pague $399 de forma segura con Stripe', payLater: 'Le enviaremos por correo un enlace de pago seguro de Stripe para completar su auditoría de $399.',
+      sendErr: 'Lo sentimos, no se pudo enviar. Llame al (316) 248-6839 y Rachel tomará su solicitud.',
+      needUrl: 'Escriba primero la dirección del sitio web, por ejemplo www.suconsultorio.com',
+      adaTitle: 'Prueba de Accesibilidad ADA', privTitle: 'Prueba de Cookies y Privacidad',
+      scanning: 'Probando su página principal y hasta 4 páginas más. Puede tardar hasta un minuto...',
+      pagesTested: 'Páginas probadas', autoScore: 'Puntuación automática de accesibilidad',
+      honest: 'Importante: las herramientas automáticas solo pueden revisar alrededor de un tercio de las reglas de accesibilidad (WCAG 2.1 AA). El resto, como si una persona ciega puede hacer una cita con un lector de pantalla o si el sitio funciona solo con teclado, necesita que una persona lo pruebe. Eso es exactamente lo que cubre nuestra auditoría de $399.',
+      found: 'Lo que encontramos', allGood: 'No encontramos problemas en esta área en las páginas probadas.', na: 'No hay nada que probar aquí en estas páginas.', more: 'más',
+      manualTitle: 'Lo que una máquina no puede probar (incluido en nuestra auditoría de $399)',
+      manual: ['Usar todo el sitio solo con el teclado', 'Escucharlo con un lector de pantalla (NVDA / VoiceOver)', 'Orden del foco y foco visible', 'Si los errores de formularios se explican claramente', 'Zoom al 200% y lectura en el teléfono', 'Contraste real de cada texto y botón', 'Calidad de subtítulos y transcripciones', 'Si las citas y pagos en línea funcionan para visitantes con discapacidad', 'Si el aviso de cookies realmente bloquea el rastreo hasta "Aceptar"', 'Formularios HIPAA y avisos de publicidad de abogados'],
+      jsNote: 'Este sitio construye la mayor parte de su contenido con JavaScript después de cargar, así que un escaneo rápido no puede verlo todo. Se recomienda una auditoría completa.',
+      fetchFail: 'No pudimos acceder a este sitio desde nuestro probador (puede bloquear revisiones automáticas). Nuestra técnica puede probarlo a mano en la auditoría completa.',
+      privScore: 'Puntuación de privacidad y cookies', privIntro: 'Esto revisa si a los visitantes se les dice qué datos recoge y si se les pregunta antes de rastrearlos.',
+      privItems: { https: 'Conexión segura (https)', privacyLink: 'Enlace a la política de privacidad', privacyDetails: 'La política explica qué datos recoge', consent: 'Aviso de consentimiento de cookies' },
+      privWhy: { https: 'El candado junto a su dirección web cifra lo que escriben los visitantes. Sin él, el navegador muestra "No seguro".', privacyLink: 'Las leyes de privacidad esperan una política de privacidad que se pueda encontrar desde cada página.', privacyDetails: 'La política debe decir qué recoge, para qué y con quién lo comparte.', consent: 'Un aviso de cookies pregunta "¿Acepta?" antes de que las herramientas de rastreo empiecen a observar al visitante.' },
+      pass: 'Aprobado', warn: 'Necesita atención', fail: 'Problema encontrado', manualS: 'Necesita revisión de una persona',
+      statesHTML: '<p><strong>Estados con más demandas por accesibilidad web (ADA) en 2025 (tribunal federal):</strong></p><ul><li>California: 3,252 demandas (más al menos $4,000 por violación bajo la Ley Unruh)</li><li>Florida: 1,823 demandas</li><li>Nueva York: 1,471 demandas (muchas más en tribunales estatales)</li><li>Les siguen Illinois, Pensilvania y Nueva Jersey</li></ul><p>California también encabeza las demandas de privacidad por rastreo (píxeles). Todos los estados siguen la ADA federal, así que un negocio en cualquier estado puede ser demandado.</p><p><a href="https://www.adatitleiii.com/2026/03/federal-court-website-accessibility-lawsuit-filings-bounce-back-in-2025/" target="_blank" rel="noopener">Vea las cifras de demandas de 2025 por estado (Seyfarth Shaw, en inglés)</a> · <a href="#stateTitle" id="wsxGoState">Vea las reglas y sanciones de su estado</a></p>'
+    }
+  };
+  const tx = k => (TX[L()][k] != null ? TX[L()][k] : TX.en[k]);
+
+  // ---------- 13 ADA categories, explained in WebSwan language ----------
+  const CATS = [
+    ['headings', 20, '1.3.1, 2.4.6', { en: ['Headings (H1, H2...)', 'Headings are the titles on a page. A blind visitor\'s screen reader jumps from heading to heading to find things, like reading a table of contents. Each page needs one main title (H1) and headings in order.'], es: ['Encabezados (H1, H2...)', 'Los encabezados son los títulos de la página. El lector de pantalla de una persona ciega salta de encabezado en encabezado, como un índice. Cada página necesita un título principal (H1) y encabezados en orden.'] }],
+    ['alt', 20, '1.1.1', { en: ['Image descriptions (alt text)', 'Alt text is a short written description of each picture. A screen reader reads it out loud, so a blind patient or client knows what the picture shows. A file name like "IMG_2041.jpg" tells them nothing.'], es: ['Descripción de imágenes (texto alt)', 'El texto alt es una descripción corta de cada imagen. El lector de pantalla la lee en voz alta para que una persona ciega sepa qué muestra la imagen. Un nombre de archivo como "IMG_2041.jpg" no le dice nada.'] }],
+    ['aria', 15, '4.1.2', { en: ['Hidden helper code (ARIA)', 'ARIA is hidden code that tells screen readers what a button or menu is. When it is wrong, the screen reader says the wrong thing, or hides buttons people still need to press.'], es: ['Código de ayuda oculto (ARIA)', 'ARIA es código oculto que le dice al lector de pantalla qué es un botón o menú. Si está mal, el lector dice algo incorrecto o esconde botones que la gente necesita.'] }],
+    ['keyboard', 15, '2.1.1, 2.4.7', { en: ['Keyboard use', 'Many people with disabilities cannot use a mouse; they move around with the Tab key. Every button and link must work with the keyboard, and they must be able to see where they are on the page.'], es: ['Uso con teclado', 'Muchas personas con discapacidad no pueden usar un ratón; se mueven con la tecla Tab. Cada botón y enlace debe funcionar con el teclado y deben poder ver dónde están en la página.'] }],
+    ['contrast', 10, '1.4.3', { en: ['Color contrast', 'Light gray text on a white background is hard to read for people with low vision and for anyone outside in the sun. Text must stand out clearly from its background.'], es: ['Contraste de color', 'El texto gris claro sobre fondo blanco es difícil de leer para personas con baja visión y para cualquiera bajo el sol. El texto debe destacar claramente del fondo.'] }],
+    ['forms', 10, '1.3.1, 4.1.2', { en: ['Form labels', 'Every box in a form (name, phone, date of birth) needs a label. Without one, a screen reader only says "edit text", and a blind visitor does not know what to type, so they cannot book with you.'], es: ['Etiquetas de formularios', 'Cada casilla de un formulario (nombre, teléfono, fecha de nacimiento) necesita una etiqueta. Sin ella, el lector de pantalla solo dice "editar texto" y la persona ciega no sabe qué escribir, así que no puede hacer una cita.'] }],
+    ['links', 10, '2.4.4', { en: ['Links', 'Screen-reader users often listen to a list of all the links on a page. "Click here" ten times, or a link with no words at all, tells them nothing about where it goes.'], es: ['Enlaces', 'Los usuarios de lector de pantalla suelen escuchar una lista de todos los enlaces. "Haga clic aquí" diez veces, o un enlace sin palabras, no dice a dónde lleva.'] }],
+    ['document', 10, '3.1.1, 4.1.1', { en: ['Page setup', 'Each page needs a language setting (so the screen reader uses the right accent), a page title, a main content area, and must let people zoom in on their phone.'], es: ['Configuración de la página', 'Cada página necesita su idioma (para que el lector use la pronunciación correcta), un título, un área de contenido principal y debe permitir hacer zoom en el teléfono.'] }],
+    ['touch', 10, '2.5.5 (AAA)', { en: ['Tap targets on phones', 'Buttons and links that are too small are hard to tap for people with shaky hands or arthritis. This is a best practice (AAA level), not a strict requirement.'], es: ['Botones en el teléfono', 'Los botones y enlaces muy pequeños son difíciles de tocar para personas con temblores o artritis. Es una buena práctica (nivel AAA), no un requisito estricto.'] }],
+    ['media', 10, '1.2.1, 1.2.2, 4.1.2', { en: ['Videos and embeds', 'Deaf visitors need captions on videos. Embedded maps and videos need a title so a screen reader can say what they are.'], es: ['Videos y contenido incrustado', 'Las personas sordas necesitan subtítulos en los videos. Los mapas y videos incrustados necesitan un título para que el lector de pantalla diga qué son.'] }],
+    ['motion', 10, '1.4.2, 2.2.2, 2.3.3', { en: ['Movement and autoplay', 'Sound that plays by itself drowns out the screen reader. Moving or sliding content can make people dizzy or distracted, and must be possible to pause.'], es: ['Movimiento y reproducción automática', 'El sonido que se reproduce solo tapa el lector de pantalla. El contenido que se mueve puede marear o distraer, y debe poder pausarse.'] }],
+    ['landmarks', 10, '1.3.1', { en: ['Page sections (landmarks)', 'Header, menu, main content and footer areas let a screen-reader user jump straight to the part they want instead of listening to the whole menu on every page.'], es: ['Secciones de la página', 'Las áreas de encabezado, menú, contenido principal y pie de página permiten al usuario de lector de pantalla saltar directo a lo que busca.'] }],
+    ['timing', 10, '2.2.1', { en: ['Time limits', 'A page that refreshes or moves on by itself does not give everyone enough time to read or fill it in.'], es: ['Límites de tiempo', 'Una página que se actualiza o cambia sola no da a todos el tiempo suficiente para leer o llenarla.'] }]
+  ];
+  const ROLES = new Set('alert alertdialog application article banner blockquote button caption cell checkbox code columnheader combobox complementary contentinfo definition deletion dialog directory document emphasis feed figure form generic grid gridcell group heading img image insertion link list listbox listitem log main mark marquee math menu menubar menuitem menuitemcheckbox menuitemradio meter navigation none note option paragraph presentation progressbar radio radiogroup region row rowgroup rowheader scrollbar search searchbox separator slider spinbutton status strong subscript superscript switch tab table tablist tabpanel term textbox time timer toolbar tooltip tree treegrid treeitem doc-subtitle'.split(' '));
+  const GENERIC = /^(click here|here|read more|more|learn more|click|link|this|go|details|more info|aquí|haga clic aquí|leer más|más)$/i;
+
+  function txt(el) { return (el && el.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function nameOf(el, doc) {
+    if (!el) return '';
+    const lb = el.getAttribute('aria-labelledby');
+    if (lb) { const n = lb.split(/\s+/).map(id => txt(doc.getElementById(id))).join(' ').trim(); if (n) return n; }
+    const al = el.getAttribute('aria-label'); if (al && al.trim()) return al.trim();
+    if (el.id) { const l = doc.querySelector('label[for="' + CSS.escape(el.id) + '"]'); if (l && txt(l)) return txt(l); }
+    const wrap = el.closest('label'); if (wrap && txt(wrap)) return txt(wrap);
+    const t = txt(el); if (t) return t;
+    const img = el.querySelector && el.querySelector('img[alt]'); if (img && img.getAttribute('alt').trim()) return img.getAttribute('alt').trim();
+    const ti = el.getAttribute('title'); if (ti && ti.trim()) return ti.trim();
+    if (el.tagName === 'INPUT' && /^(submit|button|reset)$/i.test(el.type) && el.value) return el.value;
+    return '';
+  }
+  function lum(hex) {
+    const m = String(hex).trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i); let rgb;
+    if (m) { let h = m[1]; if (h.length === 3) h = h.split('').map(c => c + c).join(''); rgb = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)); }
+    else { const r = String(hex).match(/rgba?\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)/i); if (!r) return null; rgb = [r[1], r[2], r[3]].map(Number); }
+    const c = rgb.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  const NAMED = { white: '#ffffff', black: '#000000', gray: '#808080', grey: '#808080', silver: '#c0c0c0', red: '#ff0000', blue: '#0000ff', navy: '#000080', green: '#008000', yellow: '#ffff00', orange: '#ffa500', lightgray: '#d3d3d3', lightgrey: '#d3d3d3', darkgray: '#a9a9a9', whitesmoke: '#f5f5f5' };
+  const col = v => { v = String(v || '').trim().toLowerCase(); return NAMED[v] || v; };
+
+  function testPage(html, url) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const page = (() => { try { const u = new URL(url); return u.pathname === '/' ? 'Homepage' : u.pathname; } catch (e) { return url; } })();
+    const R = {}; CATS.forEach(c => R[c[0]] = { pass: 0, total: 0, issues: [] });
+    const add = (k, ok, msg) => { R[k].total++; if (ok) R[k].pass++; else if (msg) R[k].issues.push(page + ': ' + msg); };
+    const body = doc.body || doc.documentElement;
+    // 1 Headings
+    const hs = [...doc.querySelectorAll('h1,h2,h3,h4,h5,h6')];
+    const h1 = hs.filter(h => h.tagName === 'H1');
+    add('headings', h1.length === 1, h1.length === 0 ? 'no main heading (H1)' : h1.length + ' main headings (H1) instead of one');
+    let prev = 0; hs.forEach(h => { const n = +h.tagName[1]; add('headings', !(prev && n - prev > 1), 'heading jumps from H' + prev + ' to H' + n + ' ("' + txt(h).slice(0, 50) + '")'); prev = n; });
+    hs.forEach(h => { if (!txt(h) && !h.querySelector('img[alt]')) add('headings', false, 'an empty heading'); });
+    // 2 Alt text
+    doc.querySelectorAll('img').forEach(img => {
+      const src = (img.getAttribute('src') || img.getAttribute('data-src') || '').split('/').pop().slice(0, 60);
+      if (!img.hasAttribute('alt')) { add('alt', false, 'image with no alt text (' + (src || 'no file name') + ')'); return; }
+      const a = img.getAttribute('alt').trim();
+      if (!a) { const inLink = img.closest('a,button'); add('alt', !(inLink && !txt(inLink)), 'a linked image with an empty description, so the link has no name'); return; }
+      add('alt', !(/\.(jpe?g|png|gif|webp|svg|avif)$/i.test(a) || /^(img|image|dsc|photo|pic)[-_ ]?\d+/i.test(a) || /^(image|photo|picture|graphic|logo)$/i.test(a)), 'meaningless description "' + a.slice(0, 40) + '"');
+    });
+    doc.querySelectorAll('input[type=image],area').forEach(el => add('alt', !!(el.getAttribute('alt') || '').trim(), (el.tagName === 'AREA' ? 'image-map area' : 'image button') + ' with no alt text'));
+    // 3 ARIA
+    doc.querySelectorAll('[role]').forEach(el => { const r = el.getAttribute('role').trim().split(/\s+/)[0].toLowerCase(); add('aria', ROLES.has(r), 'unknown role "' + r + '"'); });
+    doc.querySelectorAll('[aria-hidden="true"]').forEach(el => { const f = el.matches('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])') || el.querySelector('a[href],button,input:not([type=hidden]),select,textarea,[tabindex]:not([tabindex="-1"])'); add('aria', !f, 'a clickable element hidden from screen readers (aria-hidden)'); });
+    doc.querySelectorAll('[aria-labelledby],[aria-describedby]').forEach(el => { const ids = ((el.getAttribute('aria-labelledby') || '') + ' ' + (el.getAttribute('aria-describedby') || '')).trim().split(/\s+/).filter(Boolean); add('aria', ids.every(id => doc.getElementById(id)), 'points to a label that does not exist (' + ids.join(' ') + ')'); });
+    doc.querySelectorAll('button,[role=button],[role=link],[role=tab],[role=menuitem]').forEach(el => add('aria', !!nameOf(el, doc), 'a button with no name (screen reader says only "button")'));
+    // 4 Keyboard
+    doc.querySelectorAll('[tabindex]').forEach(el => { const v = parseInt(el.getAttribute('tabindex'), 10); add('keyboard', !(v > 0), 'tabindex="' + v + '" changes the natural keyboard order'); });
+    doc.querySelectorAll('div[onclick],span[onclick],li[onclick],img[onclick],td[onclick]').forEach(el => add('keyboard', el.hasAttribute('tabindex') && el.hasAttribute('role'), 'a clickable ' + el.tagName.toLowerCase() + ' that a keyboard cannot reach ("' + txt(el).slice(0, 40) + '")'));
+    doc.querySelectorAll('[onmouseover],[onmouseenter]').forEach(el => add('keyboard', el.hasAttribute('onfocus') || el.hasAttribute('onfocusin'), 'something that only works on mouse hover'));
+    const css = [...doc.querySelectorAll('style')].map(s => s.textContent).join(' ');
+    const outlineOff = (css.match(/:focus[^{]*\{[^}]*outline\s*:\s*(none|0)\b/gi) || []).length + [...doc.querySelectorAll('[style*="outline"]')].filter(e => /outline\s*:\s*(none|0)\b/i.test(e.getAttribute('style'))).length;
+    add('keyboard', !outlineOff || /:focus-visible/.test(css), 'the focus outline is turned off, so keyboard users cannot see where they are');
+    // 5 Contrast (inline colours only)
+    doc.querySelectorAll('[style*="color"]').forEach(el => {
+      const st = el.getAttribute('style'); const fg = (st.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i) || [])[1]; const bg = (st.match(/background(?:-color)?\s*:\s*(#[0-9a-f]{3,6}|rgba?\([^)]*\)|[a-z]+)/i) || [])[1];
+      if (!fg || !bg) return; const a = lum(col(fg)), b = lum(col(bg)); if (a == null || b == null || !txt(el)) return;
+      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      add('contrast', ratio >= 4.5, 'low contrast ' + ratio.toFixed(1) + ':1 on "' + txt(el).slice(0, 40) + '" (needs 4.5:1)');
+    });
+    // 6 Form labels
+    doc.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=image]),select,textarea').forEach(el => {
+      const n = nameOf(el, doc); const ph = el.getAttribute('placeholder');
+      add('forms', !!n, ph ? 'a form box labeled only by its placeholder "' + ph.slice(0, 30) + '" (it disappears when typing)' : 'a form box with no label (' + (el.getAttribute('name') || el.tagName.toLowerCase()) + ')');
+    });
+    // 7 Links
+    doc.querySelectorAll('a[href]').forEach(a => {
+      const n = nameOf(a, doc);
+      if (!n) { add('links', false, 'a link with no words (often an icon) to ' + (a.getAttribute('href') || '').slice(0, 50)); return; }
+      add('links', !GENERIC.test(n), 'a link that only says "' + n + '"');
+      if (a.getAttribute('target') === '_blank') add('links', /noopener|noreferrer/.test(a.getAttribute('rel') || ''), 'a link opening a new window without rel="noopener"');
+    });
+    // 8 Document structure
+    const htmlEl = doc.documentElement;
+    add('document', !!(htmlEl.getAttribute('lang') || '').trim(), 'no page language set');
+    add('document', !!txt(doc.querySelector('title')), 'no page title');
+    const vp = doc.querySelector('meta[name=viewport]');
+    add('document', !!vp, 'not set up for phone screens (no viewport)');
+    if (vp) add('document', !/user-scalable\s*=\s*(no|0)|maximum-scale\s*=\s*1(\.0)?\b/i.test(vp.getAttribute('content') || ''), 'zooming is blocked on phones');
+    add('document', !!doc.querySelector('main,[role=main]'), 'no main content area (<main>)');
+    const ids = {}; doc.querySelectorAll('[id]').forEach(e => ids[e.id] = (ids[e.id] || 0) + 1);
+    const dups = Object.keys(ids).filter(k => ids[k] > 1);
+    add('document', !dups.length, dups.length + ' duplicate ID' + (dups.length > 1 ? 's' : '') + ' (' + dups.slice(0, 3).join(', ') + ')');
+    // 9 Touch targets (inline sizes only)
+    doc.querySelectorAll('a[style],button[style]').forEach(el => { const st = el.getAttribute('style'); const w = (st.match(/(?:^|;)\s*width\s*:\s*(\d+)px/i) || [])[1], h = (st.match(/(?:^|;)\s*height\s*:\s*(\d+)px/i) || [])[1]; if (!w && !h) return; add('touch', !((w && +w < 44) || (h && +h < 44)), 'a button/link smaller than 44 x 44 pixels'); });
+    // 10 Media
+    doc.querySelectorAll('video').forEach(v => add('media', !!v.querySelector('track[kind=captions],track[kind=subtitles]'), 'a video without captions'));
+    doc.querySelectorAll('audio').forEach(() => add('media', false, 'an audio player: make sure a written transcript is next to it'));
+    doc.querySelectorAll('iframe').forEach(f => add('media', !!(f.getAttribute('title') || '').trim(), 'an embedded frame with no title (' + ((f.getAttribute('src') || '').replace(/^https?:\/\//, '').split('/')[0] || 'embed') + ')'));
+    // 11 Motion
+    doc.querySelectorAll('video[autoplay],audio[autoplay]').forEach(m => add('motion', m.tagName === 'VIDEO' && m.hasAttribute('muted') && (m.hasAttribute('controls') || m.hasAttribute('loop') === false), m.tagName === 'AUDIO' ? 'sound that plays by itself' : 'a video that plays by itself' + (m.hasAttribute('muted') ? ' with no pause button' : ' with sound')));
+    doc.querySelectorAll('marquee,blink').forEach(() => add('motion', false, 'scrolling/blinking text (<marquee>)'));
+    if (/@keyframes|animation\s*:/i.test(css)) add('motion', /prefers-reduced-motion/i.test(css), 'animations with no "reduce motion" option');
+    // 12 Landmarks
+    add('landmarks', !!doc.querySelector('header,[role=banner]'), 'no header area');
+    add('landmarks', !!doc.querySelector('nav,[role=navigation]'), 'no navigation (menu) area');
+    add('landmarks', !!doc.querySelector('main,[role=main]'), 'no main area');
+    add('landmarks', !!doc.querySelector('footer,[role=contentinfo]'), 'no footer area');
+    // 13 Timing
+    const mr = doc.querySelector('meta[http-equiv="refresh" i]');
+    if (mr) { const s = parseInt(mr.getAttribute('content'), 10); add('timing', s === 0, 'the page refreshes or redirects by itself after ' + s + ' seconds'); }
+    // links for crawl
+    const links = [...doc.querySelectorAll('a[href]')].map(a => { try { return new URL(a.getAttribute('href'), url).href.split('#')[0]; } catch (e) { return ''; } });
+    const textLen = txt(body).length;
+    return { R, links, textLen, page };
+  }
+
+  async function adaScan(url) {
+    const fetcher = typeof fetchViaProxies === 'function' ? fetchViaProxies : null;
+    if (!fetcher) throw new Error('no fetcher');
+    const home = await fetcher(url);
+    const first = testPage(home, url);
+    const origin = new URL(url).origin;
+    const pick = [...new Set(first.links)].filter(h => h.startsWith(origin) && h !== url && h !== origin + '/' && !/\.(pdf|jpe?g|png|gif|zip|docx?|mp4|mp3)(\?|$)/i.test(h) && !/\/(wp-admin|cart|checkout|login|account|feed)/i.test(h));
+    const pref = pick.sort((a, b) => (/contact|about|appoint|book|service|form|patient|consult/i.test(b) ? 1 : 0) - (/contact|about|appoint|book|service|form|patient|consult/i.test(a) ? 1 : 0)).slice(0, 4);
+    const more = await Promise.allSettled(pref.map(u => Promise.race([fetcher(u, 8000), new Promise((_, r) => setTimeout(() => r(new Error('slow')), 15000))]).then(h => testPage(h, u))));
+    const pages = [first].concat(more.filter(x => x.status === 'fulfilled').map(x => x.value));
+    const agg = {}; CATS.forEach(c => agg[c[0]] = { pass: 0, total: 0, issues: [] });
+    pages.forEach(p => CATS.forEach(c => { const a = agg[c[0]], b = p.R[c[0]]; a.pass += b.pass; a.total += b.total; a.issues = a.issues.concat(b.issues); }));
+    let wsum = 0, ssum = 0;
+    CATS.forEach(([k, w]) => { const a = agg[k]; a.score = a.total ? Math.round(a.pass / a.total * 100) : null; if (a.score != null) { wsum += w; ssum += w * a.score; } });
+    return { pages: pages.map(p => p.page), agg, score: wsum ? Math.round(ssum / wsum) : null, jsShell: first.textLen < 400 };
+  }
+
+  const color = s => s == null ? '#8aa0b4' : s >= 90 ? '#17864a' : s >= 70 ? '#c46a00' : '#b52d21';
+  function renderAda(res, url) {
+    const lg = L();
+    let h = `<div class="wsx-head"><i class="fa-solid fa-universal-access"></i> ${esc(tx('adaTitle'))} · ${esc(new URL(url).hostname)}</div><div class="wsx-body">`;
+    h += `<div class="wsx-top"><div class="wsx-score" style="background:${color(res.score)}">${res.score == null ? '-' : res.score}/100<small>${esc(tx('autoScore'))}</small></div><div><strong>${esc(tx('pagesTested'))}:</strong> ${esc(res.pages.join(', '))}</div></div>`;
+    if (res.jsShell) h += `<div class="wsx-note">${esc(tx('jsNote'))}</div>`;
+    h += `<div class="wsx-note">${esc(tx('honest'))}</div>`;
+    CATS.forEach(([k, , sc, names]) => {
+      const a = res.agg[k], nm = names[lg] || names.en, st = a.score == null ? 'na' : a.score >= 90 ? 'pass' : a.score >= 70 ? 'warn' : 'fail';
+      const uniq = [...new Set(a.issues)];
+      h += `<div class="wsx-cat ${st}"><h4><span>${esc(nm[0])}</span><span><span class="wsx-pill">WCAG ${esc(sc)}</span> <span class="wsx-pill" style="background:${color(a.score)};color:#fff">${a.score == null ? 'N/A' : a.score + '/100'}</span></span></h4>`;
+      if (a.score != null) h += `<div class="wsx-bar"><i style="width:${a.score}%;background:${color(a.score)}"></i></div>`;
+      h += `<p>${esc(nm[1])}</p>`;
+      h += a.score == null ? `<p><em>${esc(tx('na'))}</em></p>` : uniq.length ? `<p><strong>${esc(tx('found'))}:</strong></p><ul>${uniq.slice(0, 6).map(i => `<li>${esc(i)}</li>`).join('')}${uniq.length > 6 ? `<li>+ ${uniq.length - 6} ${esc(tx('more'))}</li>` : ''}</ul>` : `<p style="color:#17864a;font-weight:700"><i class="fa-solid fa-circle-check"></i> ${esc(tx('allGood'))}</p>`;
+      h += `</div>`;
+    });
+    h += `<h4 style="margin-top:14px"><i class="fa-solid fa-hand"></i> ${esc(tx('manualTitle'))}</h4><ul class="wsx-manual">${tx('manual').map(m => `<li>${esc(m)}</li>`).join('')}</ul></div>`;
+    return h;
+  }
+  function renderPrivacy(audit) {
+    const keys = ['https', 'privacyLink', 'privacyDetails', 'consent'];
+    const items = keys.map(k => (audit.checks || []).find(c => c.id === k)).filter(Boolean);
+    const pts = items.reduce((t, c) => t + (c.status === 'pass' ? 1 : c.status === 'warn' ? 0.5 : 0), 0);
+    const score = items.length ? Math.round(pts / items.length * 100) : null;
+    let h = `<div class="wsx-head"><i class="fa-solid fa-cookie-bite"></i> ${esc(tx('privTitle'))} · ${esc(audit.hostname || '')}</div><div class="wsx-body">`;
+    h += `<div class="wsx-top"><div class="wsx-score" style="background:${color(score)}">${score == null ? '-' : score}/100<small>${esc(tx('privScore'))}</small></div><div>${esc(tx('privIntro'))}</div></div>`;
+    items.forEach(c => { const st = c.status === 'pass' ? 'pass' : c.status === 'warn' ? 'warn' : c.status === 'manual' ? 'na' : 'fail';
+      h += `<div class="wsx-cat ${st}"><h4><span>${esc(tx('privItems')[c.id])}</span><span class="wsx-pill">${esc(tx(st === 'na' ? 'manualS' : st))}</span></h4><p>${esc(tx('privWhy')[c.id])}</p>${c.evidenceValues && c.evidenceValues.details ? `<p><em>${esc(c.evidenceValues.details)}</em></p>` : ''}</div>`; });
+    return h + '</div>';
+  }
+
+  // ---------- mode buttons ----------
+  const ADA_IDS = ['accessibilityLink', 'lang', 'viewport', 'headings', 'images', 'forms', 'landmarks', 'skipLink', 'keyboard', 'screenReader', 'contrast'];
+  let mode = null, lastAda = null, lastUrl = '';
+  function tagRows() {
+    const a = window.lastAudit; if (!a) return;
+    const rows = $('checks').children;
+    (a.checks || []).forEach((c, i) => { if (rows[i]) rows[i].classList.toggle('wsx-ada-row', ADA_IDS.includes(c.id)); });
+  }
+  function setBusy(b) { ['wsxPrivacy', 'wsxAda', 'wsxBoth'].forEach(id => $(id).disabled = b); }
+  function showCta() { $('wsxCta').hidden = false; $('wsxWebsite').value = lastUrl; }
+  async function run(m) {
+    const raw = urlInput.value.trim(); const url = typeof normalizeDomain === 'function' ? normalizeDomain(raw) : raw;
+    if (!url) { alert(tx('needUrl')); urlInput.focus(); return; }
+    mode = m; lastUrl = url; lastAda = null;
+    ['wsxPrivacy', 'wsxAda', 'wsxBoth'].forEach(id => $(id).classList.toggle('on', id === { privacy: 'wsxPrivacy', ada: 'wsxAda', both: 'wsxBoth' }[m]));
+    const res = $('result'), panel = $('wsxPanel');
+    res.classList.remove('wsx-privacy-only', 'wsx-hide');
+    panel.classList.remove('show'); panel.innerHTML = '';
+    setBusy(true);
+    try {
+      const jobs = [];
+      if (m === 'privacy' || m === 'both') jobs.push(runAudit());
+      else res.classList.add('wsx-hide');
+      if (m === 'ada' || m === 'both') {
+        panel.classList.add('show');
+        panel.innerHTML = `<div class="wsx-head"><i class="fa-solid fa-spinner fa-spin"></i> ${esc(tx('adaTitle'))}</div><div class="wsx-body">${esc(tx('scanning'))}</div>`;
+        jobs.push(adaScan(url).then(r => { lastAda = r; panel.innerHTML = renderAda(r, url); }).catch(() => { lastAda = { failed: true }; panel.innerHTML = `<div class="wsx-head"><i class="fa-solid fa-universal-access"></i> ${esc(tx('adaTitle'))}</div><div class="wsx-body"><div class="wsx-note">${esc(tx('fetchFail'))}</div></div>`; }));
+      }
+      await Promise.allSettled(jobs);
+      if (m === 'privacy') { res.classList.add('wsx-privacy-only'); tagRows(); if (window.lastAudit) { panel.innerHTML = renderPrivacy(window.lastAudit); panel.classList.add('show'); } }
+      else if (m === 'both') tagRows();
+      const st = $('jurisdiction') && $('jurisdiction').value; if (st && !$('wsxState').value) $('wsxState').value = st;
+      $('wsxScanSummary').value = [m === 'ada' ? 'ADA only' : m === 'privacy' ? 'Privacy only' : 'Both', window.lastAudit && m !== 'ada' ? 'Compliance score ' + window.lastAudit.score + '/100' : '', lastAda && !lastAda.failed ? 'ADA automated score ' + lastAda.score + '/100 (' + CATS.filter(c => lastAda.agg[c[0]].score != null && lastAda.agg[c[0]].score < 90).map(c => c[3].en[0]).join(', ') + ')' : ''].filter(Boolean).join(' · ');
+      showCta();
+    } finally { setBusy(false); }
+  }
+  $('wsxPrivacy').addEventListener('click', () => run('privacy'));
+  $('wsxAda').addEventListener('click', () => run('ada'));
+  $('wsxBoth').addEventListener('click', () => run('both'));
+  // The original Analyze button keeps working exactly as before; just clear our filters so its full result shows.
+  $('analyzeBtn').addEventListener('click', () => { mode = null; $('result').classList.remove('wsx-privacy-only', 'wsx-hide'); $('wsxPanel').classList.remove('show'); ['wsxPrivacy', 'wsxAda', 'wsxBoth'].forEach(id => $(id).classList.remove('on')); lastUrl = normalizeDomain(urlInput.value.trim()) || ''; setTimeout(showCta, 50); }, true);
+
+  // ---------- CTA, states, form ----------
+  $('wsxStart').addEventListener('click', () => { const f = $('wsxForm'); f.classList.add('show'); f.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); setTimeout(() => f.querySelector('input[name=name]').focus({ preventScroll: true }), 600); });
+  $('wsxStatesBtn').addEventListener('click', function () { const b = $('wsxStates'); const open = !b.classList.contains('show'); b.classList.toggle('show', open); this.setAttribute('aria-expanded', open); if (open) { b.innerHTML = tx('statesHTML'); const g = $('wsxGoState'); if (g) g.addEventListener('click', e => { e.preventDefault(); $('stateTitle').scrollIntoView({ behavior: 'smooth' }); const s = $('jurisdiction'); if (s) s.focus(); }); } });
+  $('wsxAuditForm').addEventListener('submit', async e => {
+    e.preventDefault(); const f = e.currentTarget, msg = $('wsxFormMsg'), pay = $('wsxPay');
+    msg.style.color = '#0a1e2f'; msg.textContent = tx('sending');
+    try {
+      const body = new URLSearchParams(new FormData(f));
+      const r = await fetch('/', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: body.toString() });
+      if (!r.ok) throw new Error('form');
+      msg.style.color = '#17864a'; msg.textContent = tx('sent');
+      const em = f.querySelector('[name=email]').value;
+      pay.innerHTML = STRIPE_AUDIT_LINK ? `<a class="wsx-cta-btn" style="text-decoration:none" href="${esc(STRIPE_AUDIT_LINK + (STRIPE_AUDIT_LINK.indexOf('?') < 0 ? '?' : '&') + 'prefilled_email=' + encodeURIComponent(em))}" target="_blank" rel="noopener"><i class="fa-brands fa-stripe"></i> ${esc(tx('payNow'))}</a>` : `<p style="font-weight:700">${esc(tx('payLater'))}</p>`;
+      pay.classList.add('show'); f.reset(); $('wsxWebsite').value = lastUrl;
+    } catch (err) { msg.style.color = '#b52d21'; msg.textContent = tx('sendErr'); }
+  });
+
+  // ---------- language ----------
+  function applyWsx() {
+    document.querySelectorAll('[data-wsx]').forEach(el => el.textContent = tx(el.dataset.wsx));
+    document.querySelectorAll('[data-wsx-html]').forEach(el => el.innerHTML = tx(el.dataset.wsxHtml));
+    if ($('wsxStates').classList.contains('show')) $('wsxStates').innerHTML = tx('statesHTML');
+    if (mode === 'ada' || mode === 'both') { if (lastAda && lastAda.failed) $('wsxPanel').innerHTML = `<div class="wsx-head"><i class="fa-solid fa-universal-access"></i> ${esc(tx('adaTitle'))}</div><div class="wsx-body"><div class="wsx-note">${esc(tx('fetchFail'))}</div></div>`; else if (lastAda) $('wsxPanel').innerHTML = renderAda(lastAda, lastUrl); }
+    if (mode === 'privacy' && window.lastAudit) $('wsxPanel').innerHTML = renderPrivacy(window.lastAudit);
+    if (mode === 'privacy' || mode === 'both') tagRows();
+  }
+  $('language').addEventListener('change', () => setTimeout(applyWsx, 0));
+  applyWsx();
+  window.__wsxTestPage = testPage; // used for local testing only
+})();
 </script>
 </body>
 </html>
