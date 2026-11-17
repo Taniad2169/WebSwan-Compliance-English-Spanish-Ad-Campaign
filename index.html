@@ -187,7 +187,7 @@
       <button id="analyzeBtn" class="primary" type="button"><i class="fa-solid fa-robot"></i> <span data-i18n="analyze">Analyze</span></button>
     </div>
 
-    <!-- ===== WebSwan add-on (Nov 2026): 3 test buttons, ADA 13-category tester, $399 deep audit CTA + form. Self-contained; does not change the original checker above. ===== -->
+    <!-- ===== WebSwan add-on (Nov 2026): 3 test buttons, ADA 13-category tester, $799 deep audit CTA + form. Self-contained; does not change the original checker above. ===== -->
     <style>
       .wsx-modes{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
       .wsx-modes button{flex:1;min-width:180px;border:2px solid #1e6f9f;background:#fff;color:#0a1e2f;border-radius:999px;padding:10px 16px;font:inherit;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
@@ -266,18 +266,18 @@
       </div>
     </div>
 
-    <!-- WebSwan add-on: ADA accessibility results, privacy-only summary, $399 deep audit -->
+    <!-- WebSwan add-on: ADA accessibility results, privacy-only summary, $799 deep audit -->
     <div id="wsxPanel" class="wsx-panel" aria-live="polite"></div>
     <div id="wsxCta" class="wsx-cta" hidden>
       <h3 data-wsx="ctaTitle">Need a deeper test to find out what's behind your website?</h3>
       <p data-wsx="ctaText">A free scan only sees part of the picture. Our technician does a thorough audit for ADA accessibility, cookies, privacy, HIPAA and bar rules, page by page, by hand and with tools, and explains every finding in plain language.</p>
-      <p><strong data-wsx="ctaPrice">Full website compliance audit: $399</strong></p>
+      <p><strong data-wsx="ctaPrice">Full website compliance audit: $799</strong></p>
       <button type="button" class="wsx-cta-btn" id="wsxStart"><i class="fa-solid fa-hand-point-right"></i> <span data-wsx="ctaBtn">Click here to start</span></button>
       <p style="margin-top:14px"><button type="button" class="wsx-link" id="wsxStatesBtn" aria-expanded="false" aria-controls="wsxStates" data-wsx="statesBtn">Is your state one of the major website compliance lawsuit states? Click to view</button></p>
       <div id="wsxStates" class="wsx-states"></div>
     </div>
     <section id="wsxForm" class="wsx-form" aria-labelledby="wsxFormTitle">
-      <h3 id="wsxFormTitle"><i class="fa-solid fa-clipboard-check"></i> <span data-wsx="formTitle">Start your $399 website compliance audit</span></h3>
+      <h3 id="wsxFormTitle"><i class="fa-solid fa-clipboard-check"></i> <span data-wsx="formTitle">Start your $799 website compliance audit</span></h3>
       <p style="margin:6px 0;font-size:.92rem" data-wsx="formIntro">Here is what happens next:</p>
       <ol class="wsx-steps">
         <li data-wsx="step1">You fill out this form and pay securely.</li>
@@ -299,7 +299,7 @@
           <label class="full"><span data-wsx="fTime">Best days and times to reach you</span><input class="field" name="best_time"></label>
           <p class="wsx-disclaimer full" data-wsx-html="disclaimer"></p>
           <label class="full" style="flex-direction:row;align-items:flex-start;gap:8px;font-weight:600"><input type="checkbox" name="consent" required style="margin-top:4px"><span data-wsx="consent">I agree to the information use described above, and I agree to receive a call from WebSwan's virtual assistant to schedule my appointment.</span></label>
-          <button class="primary full" type="submit"><i class="fa-solid fa-lock"></i> <span data-wsx="submit">Continue to secure payment ($399)</span></button>
+          <button class="primary full" type="submit"><i class="fa-solid fa-lock"></i> <span data-wsx="submit">Continue to secure payment ($799)</span></button>
           <p id="wsxFormMsg" class="full" aria-live="polite" style="font-weight:700"></p>
         </div>
       </form>
@@ -1501,12 +1501,12 @@ applyLanguage();
 <script>
 /* ===== WebSwan add-on (Nov 2026) =====
    Three test buttons (privacy only / ADA only / both), a 13-category ADA accessibility tester
-   explained in plain WebSwan language, and the $399 deep-audit call to action + form.
+   explained in plain WebSwan language, and the $799 deep-audit call to action + form.
    It only READS from the original checker (runAudit, fetchViaProxies, normalizeDomain, lang,
    window.lastAudit); it never changes the original code or its report. */
 (function () {
-  // Paste the Stripe Payment Link for the $399 audit here (Stripe Dashboard > Payment Links). Empty = we email/text the link.
-  const STRIPE_AUDIT_LINK = 'https://buy.stripe.com/eVqbJ3ent8WQ9Bs4tG3Nm07';
+  // Paste the Stripe Payment Link for the $799 audit here (Stripe Dashboard > Payment Links). Empty = we email/text the link.
+  const STRIPE_AUDIT_LINK = ''; // old $399 Stripe link removed. Paste the new $799 Payment Link here.
   const $ = id => document.getElementById(id);
   const esc = v => String(v == null ? '' : v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const L = () => (typeof lang !== 'undefined' && lang === 'es') ? 'es' : 'en';
@@ -1517,9 +1517,9 @@ applyLanguage();
       modeHint: 'Some states only enforce ADA accessibility, others also enforce privacy and cookie consent. Pick what you need, or check both.',
       ctaTitle: "Need a deeper test to find out what's behind your website?",
       ctaText: 'A free scan only sees part of the picture. Our technician does a thorough audit for ADA accessibility, cookies, privacy, HIPAA and bar rules, page by page, by hand and with tools, and explains every finding in plain language.',
-      ctaPrice: 'Full website compliance audit: $399', ctaBtn: 'Click here to start',
+      ctaPrice: 'Full website compliance audit: $799', ctaBtn: 'Click here to start',
       statesBtn: 'Is your state one of the major website compliance lawsuit states? Click to view',
-      formTitle: 'Start your $399 website compliance audit', formIntro: 'Here is what happens next:',
+      formTitle: 'Start your $799 website compliance audit', formIntro: 'Here is what happens next:',
       step1: 'You fill out this form and pay securely.', step2: 'We run the full audit and contact you within 48 hours with your results.',
       step3: 'You will receive a call from Rachel, our virtual assistant, to set your 15-minute phone appointment.',
       step4: 'At your scheduled time, Tania reviews your website audit with you: the findings and your options.',
@@ -1528,17 +1528,17 @@ applyLanguage();
       fTime: 'Best days and times to reach you',
       disclaimer: '<strong>Why we ask for your information:</strong> WebSwan Digital Solutions collects your name, business, email, phone, website and state only to run your website audit, send you the results, and call you to schedule and hold your review appointment. We do not sell or share your information. Your payment is handled by Stripe; we never see or store your card number. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. The audit is a technical review of your website, not legal advice.',
       consent: "I agree to the information use described above, and I agree to receive a call from WebSwan's virtual assistant to schedule my appointment.",
-      submit: 'Continue to secure payment ($399)',
+      submit: 'Continue to secure payment ($799)',
       sending: 'Sending...', sent: 'Thank you! Your request is in. We will contact you within 48 hours with your results, and Rachel, our virtual assistant, will call you to set your 15-minute appointment.',
-      payNow: 'Pay $399 securely with Stripe', payLater: 'We will send you a secure Stripe payment link by email to complete your $399 audit.',
+      payNow: 'Pay $799 securely with Stripe', payLater: 'We will send you a secure Stripe payment link by email to complete your $799 audit.',
       sendErr: 'Sorry, that did not go through. Please call (316) 248-6839 and Rachel will take your request.',
       needUrl: 'Please type a website address first, like www.yourpractice.com',
       adaTitle: 'ADA Accessibility Test', privTitle: 'Cookie & Privacy Test',
       scanning: 'Testing your homepage and up to 4 more pages. This can take up to a minute...',
       pagesTested: 'Pages tested', autoScore: 'Automated accessibility score',
-      honest: "Important: automated tools can only check about a third of the accessibility rules (WCAG 2.1 AA). The rest, like whether a blind person can actually book an appointment with a screen reader, or whether the site works with a keyboard only, needs a person to test it. That is exactly what our $399 audit covers.",
+      honest: "Important: automated tools can only check about a third of the accessibility rules (WCAG 2.1 AA). The rest, like whether a blind person can actually book an appointment with a screen reader, or whether the site works with a keyboard only, needs a person to test it. That is exactly what our $799 audit covers.",
       found: 'What we found', allGood: 'No problems found in this area on the pages we tested.', na: 'Nothing to test here on these pages.', more: 'more',
-      manualTitle: 'What a machine cannot test (covered in our $399 audit)',
+      manualTitle: 'What a machine cannot test (covered in our $799 audit)',
       manual: ['Using the whole site with a keyboard only', 'Listening to it with a screen reader (NVDA / VoiceOver)', 'Focus order and visible focus', 'Whether form errors are explained clearly', 'Zoom to 200% and phone readability', 'Real color contrast of every text and button', 'Video captions and audio transcripts quality', 'Whether online booking and payment work for disabled visitors', 'Cookie banner really blocking tracking until "Accept"', 'HIPAA forms and attorney advertising disclaimers'],
       jsNote: 'This website builds most of its content with JavaScript after it loads, so a quick scan cannot see everything. A full audit is recommended.',
       fetchFail: 'We could not reach this website from our tester (it may block automated checks). Our technician can test it by hand in the full audit.',
@@ -1553,9 +1553,9 @@ applyLanguage();
       modeHint: 'Algunos estados solo exigen accesibilidad ADA; otros también exigen privacidad y consentimiento de cookies. Elija lo que necesita o revise ambos.',
       ctaTitle: '¿Necesita una prueba más profunda para saber qué hay detrás de su sitio web?',
       ctaText: 'Un escaneo gratuito solo ve una parte. Nuestra técnica hace una auditoría completa de accesibilidad ADA, cookies, privacidad, HIPAA y reglas del colegio de abogados, página por página, a mano y con herramientas, y explica cada hallazgo en lenguaje sencillo.',
-      ctaPrice: 'Auditoría completa de cumplimiento web: $399', ctaBtn: 'Haga clic aquí para comenzar',
+      ctaPrice: 'Auditoría completa de cumplimiento web: $799', ctaBtn: 'Haga clic aquí para comenzar',
       statesBtn: '¿Su estado es uno de los que tienen más demandas por cumplimiento web? Haga clic para ver',
-      formTitle: 'Comience su auditoría de cumplimiento web de $399', formIntro: 'Esto es lo que sigue:',
+      formTitle: 'Comience su auditoría de cumplimiento web de $799', formIntro: 'Esto es lo que sigue:',
       step1: 'Usted llena este formulario y paga de forma segura.', step2: 'Hacemos la auditoría completa y le contactamos dentro de 48 horas con sus resultados.',
       step3: 'Recibirá una llamada de Rachel, nuestra asistente virtual, para fijar su cita telefónica de 15 minutos.',
       step4: 'A la hora acordada, Tania revisa con usted la auditoría de su sitio web: los hallazgos y sus opciones.',
@@ -1564,17 +1564,17 @@ applyLanguage();
       fTime: 'Mejores días y horas para contactarle',
       disclaimer: '<strong>Por qué pedimos su información:</strong> WebSwan Digital Solutions recoge su nombre, negocio, correo, teléfono, sitio web y estado solo para hacer la auditoría de su sitio, enviarle los resultados y llamarle para programar y realizar su cita de revisión. No vendemos ni compartimos su información. Su pago lo procesa Stripe; nunca vemos ni guardamos el número de su tarjeta. Vea nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>. La auditoría es una revisión técnica de su sitio web, no asesoría legal.',
       consent: 'Acepto el uso de mi información descrito arriba y acepto recibir una llamada de la asistente virtual de WebSwan para programar mi cita.',
-      submit: 'Continuar al pago seguro ($399)',
+      submit: 'Continuar al pago seguro ($799)',
       sending: 'Enviando...', sent: '¡Gracias! Recibimos su solicitud. Le contactaremos dentro de 48 horas con sus resultados, y Rachel, nuestra asistente virtual, le llamará para fijar su cita de 15 minutos.',
-      payNow: 'Pague $399 de forma segura con Stripe', payLater: 'Le enviaremos por correo un enlace de pago seguro de Stripe para completar su auditoría de $399.',
+      payNow: 'Pague $799 de forma segura con Stripe', payLater: 'Le enviaremos por correo un enlace de pago seguro de Stripe para completar su auditoría de $799.',
       sendErr: 'Lo sentimos, no se pudo enviar. Llame al (316) 248-6839 y Rachel tomará su solicitud.',
       needUrl: 'Escriba primero la dirección del sitio web, por ejemplo www.suconsultorio.com',
       adaTitle: 'Prueba de Accesibilidad ADA', privTitle: 'Prueba de Cookies y Privacidad',
       scanning: 'Probando su página principal y hasta 4 páginas más. Puede tardar hasta un minuto...',
       pagesTested: 'Páginas probadas', autoScore: 'Puntuación automática de accesibilidad',
-      honest: 'Importante: las herramientas automáticas solo pueden revisar alrededor de un tercio de las reglas de accesibilidad (WCAG 2.1 AA). El resto, como si una persona ciega puede hacer una cita con un lector de pantalla o si el sitio funciona solo con teclado, necesita que una persona lo pruebe. Eso es exactamente lo que cubre nuestra auditoría de $399.',
+      honest: 'Importante: las herramientas automáticas solo pueden revisar alrededor de un tercio de las reglas de accesibilidad (WCAG 2.1 AA). El resto, como si una persona ciega puede hacer una cita con un lector de pantalla o si el sitio funciona solo con teclado, necesita que una persona lo pruebe. Eso es exactamente lo que cubre nuestra auditoría de $799.',
       found: 'Lo que encontramos', allGood: 'No encontramos problemas en esta área en las páginas probadas.', na: 'No hay nada que probar aquí en estas páginas.', more: 'más',
-      manualTitle: 'Lo que una máquina no puede probar (incluido en nuestra auditoría de $399)',
+      manualTitle: 'Lo que una máquina no puede probar (incluido en nuestra auditoría de $799)',
       manual: ['Usar todo el sitio solo con el teclado', 'Escucharlo con un lector de pantalla (NVDA / VoiceOver)', 'Orden del foco y foco visible', 'Si los errores de formularios se explican claramente', 'Zoom al 200% y lectura en el teléfono', 'Contraste real de cada texto y botón', 'Calidad de subtítulos y transcripciones', 'Si las citas y pagos en línea funcionan para visitantes con discapacidad', 'Si el aviso de cookies realmente bloquea el rastreo hasta "Aceptar"', 'Formularios HIPAA y avisos de publicidad de abogados'],
       jsNote: 'Este sitio construye la mayor parte de su contenido con JavaScript después de cargar, así que un escaneo rápido no puede verlo todo. Se recomienda una auditoría completa.',
       fetchFail: 'No pudimos acceder a este sitio desde nuestro probador (puede bloquear revisiones automáticas). Nuestra técnica puede probarlo a mano en la auditoría completa.',
