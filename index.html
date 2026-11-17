@@ -280,7 +280,7 @@
       <h3 id="wsxFormTitle"><i class="fa-solid fa-clipboard-check"></i> <span data-wsx="formTitle">Start your $799 website compliance audit</span></h3>
       <p style="margin:6px 0;font-size:.92rem" data-wsx="formIntro">Here is what happens next:</p>
       <ol class="wsx-steps">
-        <li data-wsx="step1">You fill out this form and pay securely.</li>
+        <li data-wsx="step1">You fill out this form to request your audit.</li>
         <li data-wsx="step2">We run the full audit and contact you within 48 hours with your results.</li>
         <li data-wsx="step3">You will receive a call from Rachel, our virtual assistant, to set your 15-minute phone appointment.</li>
         <li data-wsx="step4">At your scheduled time, Tania reviews your website audit with you: the findings and your options.</li>
@@ -299,7 +299,7 @@
           <label class="full"><span data-wsx="fTime">Best days and times to reach you</span><input class="field" name="best_time"></label>
           <p class="wsx-disclaimer full" data-wsx-html="disclaimer"></p>
           <label class="full" style="flex-direction:row;align-items:flex-start;gap:8px;font-weight:600"><input type="checkbox" name="consent" required style="margin-top:4px"><span data-wsx="consent">I agree to the information use described above, and I agree to receive a call from WebSwan's virtual assistant to schedule my appointment.</span></label>
-          <button class="primary full" type="submit"><i class="fa-solid fa-lock"></i> <span data-wsx="submit">Continue to secure payment ($799)</span></button>
+          <button class="primary full" type="submit"><i class="fa-solid fa-paper-plane"></i> <span data-wsx="submit">Request my $799 audit</span></button>
           <p id="wsxFormMsg" class="full" aria-live="polite" style="font-weight:700"></p>
         </div>
       </form>
@@ -1505,8 +1505,7 @@ applyLanguage();
    It only READS from the original checker (runAudit, fetchViaProxies, normalizeDomain, lang,
    window.lastAudit); it never changes the original code or its report. */
 (function () {
-  // Paste the Stripe Payment Link for the $799 audit here (Stripe Dashboard > Payment Links). Empty = we email/text the link.
-  const STRIPE_AUDIT_LINK = ''; // old $399 Stripe link removed. Paste the new $799 Payment Link here.
+  const STRIPE_AUDIT_LINK = ''; // no online payment: requests only
   const $ = id => document.getElementById(id);
   const esc = v => String(v == null ? '' : v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const L = () => (typeof lang !== 'undefined' && lang === 'es') ? 'es' : 'en';
@@ -1520,17 +1519,17 @@ applyLanguage();
       ctaPrice: 'Full website compliance audit: $799', ctaBtn: 'Click here to start',
       statesBtn: 'Is your state one of the major website compliance lawsuit states? Click to view',
       formTitle: 'Start your $799 website compliance audit', formIntro: 'Here is what happens next:',
-      step1: 'You fill out this form and pay securely.', step2: 'We run the full audit and contact you within 48 hours with your results.',
+      step1: 'You fill out this form to request your audit.', step2: 'We run the full audit and contact you within 48 hours with your results.',
       step3: 'You will receive a call from Rachel, our virtual assistant, to set your 15-minute phone appointment.',
       step4: 'At your scheduled time, Tania reviews your website audit with you: the findings and your options.',
       fName: 'Full name', fBusiness: 'Business / practice name', fEmail: 'Email address', fPhone: 'Phone number (Rachel will call this number)',
       fWebsite: 'Website to audit', fState: 'State where you operate', fType: 'Type of business', optChoose: 'Choose one', optMed: 'Medical, dental or chiropractic', optLaw: 'Law firm', optOther: 'Other business',
       fTime: 'Best days and times to reach you',
-      disclaimer: '<strong>Why we ask for your information:</strong> WebSwan Digital Solutions collects your name, business, email, phone, website and state only to run your website audit, send you the results, and call you to schedule and hold your review appointment. We do not sell or share your information. Your payment is handled by Stripe; we never see or store your card number. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. The audit is a technical review of your website, not legal advice.',
+      disclaimer: '<strong>Why we ask for your information:</strong> WebSwan Digital Solutions collects your name, business, email, phone, website and state only to run your website audit, send you the results, and call you to schedule and hold your review appointment. We do not sell or share your information. See our <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. The audit is a technical review of your website, not legal advice.',
       consent: "I agree to the information use described above, and I agree to receive a call from WebSwan's virtual assistant to schedule my appointment.",
-      submit: 'Continue to secure payment ($799)',
+      submit: 'Request my $799 audit',
       sending: 'Sending...', sent: 'Thank you! Your request is in. We will contact you within 48 hours with your results, and Rachel, our virtual assistant, will call you to set your 15-minute appointment.',
-      payNow: 'Pay $799 securely with Stripe', payLater: 'We will send you a secure Stripe payment link by email to complete your $799 audit.',
+      payNow: 'Request received', payLater: 'Thank you! We received your request for the $799 audit and will contact you shortly to confirm the details.',
       sendErr: 'Sorry, that did not go through. Please call (316) 248-6839 and Rachel will take your request.',
       needUrl: 'Please type a website address first, like www.yourpractice.com',
       adaTitle: 'ADA Accessibility Test', privTitle: 'Cookie & Privacy Test',
@@ -1562,11 +1561,11 @@ applyLanguage();
       fName: 'Nombre completo', fBusiness: 'Nombre del negocio / consultorio', fEmail: 'Correo electrónico', fPhone: 'Teléfono (Rachel llamará a este número)',
       fWebsite: 'Sitio web a auditar', fState: 'Estado donde opera', fType: 'Tipo de negocio', optChoose: 'Elija uno', optMed: 'Médico, dental o quiropráctico', optLaw: 'Bufete de abogados', optOther: 'Otro negocio',
       fTime: 'Mejores días y horas para contactarle',
-      disclaimer: '<strong>Por qué pedimos su información:</strong> WebSwan Digital Solutions recoge su nombre, negocio, correo, teléfono, sitio web y estado solo para hacer la auditoría de su sitio, enviarle los resultados y llamarle para programar y realizar su cita de revisión. No vendemos ni compartimos su información. Su pago lo procesa Stripe; nunca vemos ni guardamos el número de su tarjeta. Vea nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>. La auditoría es una revisión técnica de su sitio web, no asesoría legal.',
+      disclaimer: '<strong>Por qué pedimos su información:</strong> WebSwan Digital Solutions recoge su nombre, negocio, correo, teléfono, sitio web y estado solo para hacer la auditoría de su sitio, enviarle los resultados y llamarle para programar y realizar su cita de revisión. No vendemos ni compartimos su información. Vea nuestra <a href="https://www.thewebswan.com/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>. La auditoría es una revisión técnica de su sitio web, no asesoría legal.',
       consent: 'Acepto el uso de mi información descrito arriba y acepto recibir una llamada de la asistente virtual de WebSwan para programar mi cita.',
-      submit: 'Continuar al pago seguro ($799)',
+      submit: 'Solicitar mi auditoría de $799',
       sending: 'Enviando...', sent: '¡Gracias! Recibimos su solicitud. Le contactaremos dentro de 48 horas con sus resultados, y Rachel, nuestra asistente virtual, le llamará para fijar su cita de 15 minutos.',
-      payNow: 'Pague $799 de forma segura con Stripe', payLater: 'Le enviaremos por correo un enlace de pago seguro de Stripe para completar su auditoría de $799.',
+      payNow: 'Solicitud recibida', payLater: '¡Gracias! Recibimos su solicitud de la auditoría de $799 y nos comunicaremos con usted pronto para confirmar los detalles.',
       sendErr: 'Lo sentimos, no se pudo enviar. Llame al (316) 248-6839 y Rachel tomará su solicitud.',
       needUrl: 'Escriba primero la dirección del sitio web, por ejemplo www.suconsultorio.com',
       adaTitle: 'Prueba de Accesibilidad ADA', privTitle: 'Prueba de Cookies y Privacidad',
